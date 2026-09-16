@@ -117,6 +117,17 @@ async function getAssetOnChain(tokenId) {
   };
 }
 
+/** Query owner address and DID binding for a token */
+async function getAssetOwnerOnChain(tokenId) {
+  const contract = await getAssetContract();
+  const info = await contract.getAssetOwner(tokenId);
+  return {
+    ownerAddress: info.ownerAddress,
+    targetDID: info.targetDID,
+    targetDIDHash: info.targetDIDHash,
+  };
+}
+
 /** Query token IDs associated with target DID */
 async function getAssetsByDIDOnChain(targetDID) {
   const contract = await getAssetContract();
@@ -133,5 +144,6 @@ module.exports = {
   mintAssetOnChain,
   assignAssetOnChain,
   getAssetOnChain,
+  getAssetOwnerOnChain,
   getAssetsByDIDOnChain,
 };

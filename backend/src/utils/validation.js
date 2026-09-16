@@ -191,6 +191,80 @@ function validateDeveloperApp(payload) {
   return payload.name.trim();
 }
 
+function validateEthereumAddress(address, label = 'recipient') {
+  if (typeof address !== 'string' || address.trim() === '') {
+    throw new ValidationError(`${label} is required.`);
+  }
+  const clean = address.trim();
+  if (!/^0x[a-fA-F0-9]{40}$/.test(clean)) {
+    throw new ValidationError(`${label} must be a valid Ethereum address.`);
+  }
+  return clean;
+}
+
+function validateDID(did, label = 'targetDID') {
+  if (typeof did !== 'string' || did.trim() === '') {
+    throw new ValidationError(`${label} is required.`);
+  }
+  const clean = did.trim();
+  if (!/^did:[a-z0-9]+:[a-zA-Z0-9_.:%-]+$/.test(clean)) {
+    throw new ValidationError(`${label} must be a valid DID string.`);
+  }
+  return clean;
+}
+
+function validateTokenId(tokenId) {
+  if (tokenId === undefined || tokenId === null || (typeof tokenId === 'string' && tokenId.trim() === '')) {
+    throw new ValidationError('tokenId is required.');
+  }
+  const str = String(tokenId).trim();
+  if (!/^\d+$/.test(str) || BigInt(str) < 1n) {
+    throw new ValidationError('tokenId must be a positive integer.');
+  }
+  return str;
+}
+
+function validateMintAsset(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new ValidationError('Request body must be a JSON object.');
+  }
+
+  const recipient = validateEthereumAddress(payload.recipient, 'recipient');
+  const targetDID = validateDID(payload.targetDID, 'targetDID');
+  const name = requiredText(payload.name, 'name');
+  const category = requiredText(payload.category, 'category');
+
+  let ipfsHash = '';
+  if (hasOwn(payload, 'ipfsHash') && payload.ipfsHash !== null && payload.ipfsHash !== undefined) {
+    if (typeof payload.ipfsHash !== 'string') {
+      throw new ValidationError('ipfsHash must be a string.');
+    }
+    ipfsHash = payload.ipfsHash.trim();
+  }
+
+  let payloadHash = '0x0000000000000000000000000000000000000000000000000000000000000000';
+  if (hasOwn(payload, 'payloadHash') && payload.payloadHash !== null && payload.payloadHash !== undefined) {
+    if (typeof payload.payloadHash !== 'string' || !/^0x[a-fA-F0-9]{64}$/.test(payload.payloadHash.trim())) {
+      throw new ValidationError('payloadHash must be a valid 32-byte hex string (0x followed by 64 hex characters).');
+    }
+    payloadHash = payload.payloadHash.trim().toLowerCase();
+  }
+
+  return { recipient, targetDID, name, category, ipfsHash, payloadHash };
+}
+
+function validateTransferAsset(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new ValidationError('Request body must be a JSON object.');
+  }
+
+  const tokenId = validateTokenId(payload.tokenId);
+  const recipient = validateEthereumAddress(payload.recipient, 'recipient');
+  const targetDID = validateDID(payload.targetDID, 'targetDID');
+
+  return { tokenId, recipient, targetDID };
+}
+
 module.exports = {
   ValidationError,
   validateRegistration,
@@ -198,4 +272,9 @@ module.exports = {
   validateConsent,
   validateDeveloperApp,
   validateBiometricCommitment,
+  validateEthereumAddress,
+  validateDID,
+  validateTokenId,
+  validateMintAsset,
+  validateTransferAsset,
 };

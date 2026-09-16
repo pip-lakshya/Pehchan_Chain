@@ -4,6 +4,7 @@ const express = require('express');
 const identityRoutes = require('./routes/identityRoutes');
 const developerRoutes = require('./routes/developerRoutes');
 const verificationRoutes = require('./routes/verificationRoutes');
+const assetRoutes = require('./routes/assetRoutes');
 
 const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN
@@ -23,6 +24,7 @@ app.get('/health', (req, res) => {
 app.use('/identity', identityRoutes);
 app.use('/developer', developerRoutes);
 app.use('/verify', verificationRoutes);
+app.use('/asset', assetRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
