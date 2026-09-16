@@ -171,3 +171,39 @@ export async function verifyAgeOver18(walletId) {
 
   return { requestId, ageOver18: data.ageOver18 };
 }
+
+export async function mintAsset({ requesterDID, recipient, targetDID, name, category, ipfsHash, payloadHash }) {
+  const response = await fetch(`${API_BASE_URL}/asset/mint`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ requesterDID, recipient, targetDID, name, category, ipfsHash, payloadHash }),
+  });
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody.data;
+}
+
+export async function transferAsset({ requesterDID, tokenId, recipient, targetDID }) {
+  const response = await fetch(`${API_BASE_URL}/asset/transfer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ requesterDID, tokenId, recipient, targetDID }),
+  });
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody.data;
+}
+
+export async function getAssetOwner(tokenId) {
+  const response = await fetch(`${API_BASE_URL}/asset/owner/${encodeURIComponent(tokenId)}`);
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody.data;
+}
+
+export async function getAssetsByIdentity(did) {
+  const response = await fetch(`${API_BASE_URL}/asset/identity/${encodeURIComponent(did)}`);
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody.data;
+}

@@ -234,6 +234,11 @@ function validateMintAsset(payload) {
   const name = requiredText(payload.name, 'name');
   const category = requiredText(payload.category, 'category');
 
+  let requesterDID = null;
+  if (hasOwn(payload, 'requesterDID') && payload.requesterDID) {
+    requesterDID = validateDID(payload.requesterDID, 'requesterDID');
+  }
+
   let ipfsHash = '';
   if (hasOwn(payload, 'ipfsHash') && payload.ipfsHash !== null && payload.ipfsHash !== undefined) {
     if (typeof payload.ipfsHash !== 'string') {
@@ -250,7 +255,7 @@ function validateMintAsset(payload) {
     payloadHash = payload.payloadHash.trim().toLowerCase();
   }
 
-  return { recipient, targetDID, name, category, ipfsHash, payloadHash };
+  return { requesterDID, recipient, targetDID, name, category, ipfsHash, payloadHash };
 }
 
 function validateTransferAsset(payload) {
@@ -262,7 +267,12 @@ function validateTransferAsset(payload) {
   const recipient = validateEthereumAddress(payload.recipient, 'recipient');
   const targetDID = validateDID(payload.targetDID, 'targetDID');
 
-  return { tokenId, recipient, targetDID };
+  let requesterDID = null;
+  if (hasOwn(payload, 'requesterDID') && payload.requesterDID) {
+    requesterDID = validateDID(payload.requesterDID, 'requesterDID');
+  }
+
+  return { requesterDID, tokenId, recipient, targetDID };
 }
 
 const supportedRoles = new Set(['ADMIN', 'MANAGER', 'AUDITOR', 'USER']);
