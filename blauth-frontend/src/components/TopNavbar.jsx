@@ -20,7 +20,7 @@ function TopNavbar() {
 
   return (
     <header className="blauth-app-nav">
-      <Link className="blauth-brand" to="/" aria-label="BLAuth home"><span className="blauth-brand-mark">B</span><span>BLAuth</span></Link>
+      <Link className="blauth-brand" to="/" aria-label="PehchanChain home"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link>
       <nav aria-label="Application navigation">
         {links.map((link) => <Link className={pathname === link.to ? "is-active" : ""} key={link.to} to={link.to}>{link.label}</Link>)}
       </nav>

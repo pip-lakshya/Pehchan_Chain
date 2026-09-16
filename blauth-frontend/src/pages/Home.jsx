@@ -42,9 +42,9 @@ function Home() {
         <div className="blauth-orb blauth-orb-one" />
         <div className="blauth-orb blauth-orb-two" />
         <nav className="blauth-nav" aria-label="Primary navigation">
-          <Link className="blauth-brand" to="/" aria-label="BLAuth home">
-            <span className="blauth-brand-mark">B</span>
-            <span>BLAuth</span>
+          <Link className="blauth-brand" to="/" aria-label="PehchanChain home">
+            <span className="blauth-brand-mark">P</span>
+            <span>PehchanChain</span>
           </Link>
           <span className="blauth-nav-status"><i /> Privacy-first identity</span>
         </nav>

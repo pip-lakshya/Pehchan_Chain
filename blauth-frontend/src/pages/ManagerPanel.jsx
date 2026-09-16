@@ -141,8 +141,8 @@ function ManagerPanel() {
       {/* Secondary nav — mirrors Admin Console style */}
       <nav className="blauth-register-nav" aria-label="Manager navigation">
         <Link className="blauth-brand" to="/">
-          <span className="blauth-brand-mark">B</span>
-          <span>BLAuth</span>
+          <span className="blauth-brand-mark">P</span>
+          <span>PehchanChain</span>
         </Link>
         <span className="blauth-nav-status">
           <i /> Manager Panel

@@ -175,7 +175,7 @@ function FaceVerify() {
       <div className="blauth-register-orb blauth-verify-orb-one" />
       <div className="blauth-register-orb blauth-verify-orb-two" />
       <nav className="blauth-register-nav" aria-label="Face verification navigation">
-        <Link className="blauth-brand" to="/" aria-label="BLAuth home"><span className="blauth-brand-mark">B</span><span>BLAuth</span></Link>
+        <Link className="blauth-brand" to="/" aria-label="PehchanChain home"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link>
         <span className="blauth-nav-status"><i /> Local-only verification</span>
       </nav>
 
