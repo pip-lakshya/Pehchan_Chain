@@ -3,12 +3,18 @@ pragma solidity ^0.8.24;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {PehchanAccessControl} from "./PehchanAccessControl.sol";
 
 /**
  * @title PehchanAssetRegistry
  * @dev ERC-721 Digital Asset Registry for PehchanChain (SIH26125).
  * Built on OpenZeppelin ERC-721 to ensure security, standard compliance,
  * unique asset identification, DID ownership indexing, and role-governed lifecycle.
+ *
+ * All permission checks are delegated to a shared PehchanAccessControl hub.
+ *   - mintAsset()          → requires ADMIN_ROLE
+ *   - assignAsset()        → requires ADMIN_ROLE or MANAGER_ROLE
+ *   - setCredentialRegistry() → requires ADMIN_ROLE
  */
 contract PehchanAssetRegistry is ERC721URIStorage {
     struct Asset {
@@ -24,10 +30,9 @@ contract PehchanAssetRegistry is ERC721URIStorage {
     }
 
     uint256 private _nextTokenId;
-    address public admin;
+    PehchanAccessControl public immutable accessControl;
     address public credentialRegistry;
 
-    mapping(address => bool) public isManager;
     mapping(uint256 => Asset) private _assets;
     mapping(bytes32 => uint256[]) private _didTokens;
     mapping(uint256 => uint256) private _didTokenIndex;
@@ -57,19 +62,23 @@ contract PehchanAssetRegistry is ERC721URIStorage {
         uint256 timestamp
     );
 
-    event ManagerAuthorized(address indexed manager, uint256 timestamp);
-    event ManagerRevoked(address indexed manager, uint256 timestamp);
-    event AdminTransferred(address indexed previousAdmin, address indexed newAdmin, uint256 timestamp);
     event CredentialRegistryUpdated(address indexed oldRegistry, address indexed newRegistry);
 
+    // -----------------------------------------------------------------------
+    // Modifiers — delegate to PehchanAccessControl hub
+    // -----------------------------------------------------------------------
+
     modifier onlyAdmin() {
-        require(msg.sender == admin, "PehchanAssetRegistry: caller is not admin");
+        require(
+            accessControl.isAdmin(msg.sender),
+            "PehchanAssetRegistry: caller is not admin"
+        );
         _;
     }
 
     modifier onlyAdminOrManager() {
         require(
-            msg.sender == admin || isManager[msg.sender],
+            accessControl.isAdmin(msg.sender) || accessControl.isManager(msg.sender),
             "PehchanAssetRegistry: caller is not admin or manager"
         );
         _;
@@ -78,38 +87,12 @@ contract PehchanAssetRegistry is ERC721URIStorage {
     constructor(
         string memory name,
         string memory symbol,
-        address initialAdmin,
+        address _accessControl,
         address _credentialRegistry
     ) ERC721(name, symbol) {
-        admin = initialAdmin == address(0) ? msg.sender : initialAdmin;
+        require(_accessControl != address(0), "PehchanAssetRegistry: zero access control");
+        accessControl = PehchanAccessControl(_accessControl);
         credentialRegistry = _credentialRegistry;
-    }
-
-    /**
-     * @notice Authorize or revoke a Manager address.
-     * @param manager The manager address to configure.
-     * @param authorized True to authorize, false to revoke.
-     */
-    function setManager(address manager, bool authorized) external onlyAdmin {
-        require(manager != address(0), "PehchanAssetRegistry: invalid manager address");
-        isManager[manager] = authorized;
-
-        if (authorized) {
-            emit ManagerAuthorized(manager, block.timestamp);
-        } else {
-            emit ManagerRevoked(manager, block.timestamp);
-        }
-    }
-
-    /**
-     * @notice Transfer admin authority to a new address.
-     * @param newAdmin The address of the new administrator.
-     */
-    function transferAdmin(address newAdmin) external onlyAdmin {
-        require(newAdmin != address(0), "PehchanAssetRegistry: invalid admin address");
-        address oldAdmin = admin;
-        admin = newAdmin;
-        emit AdminTransferred(oldAdmin, newAdmin, block.timestamp);
     }
 
     /**
@@ -124,7 +107,7 @@ contract PehchanAssetRegistry is ERC721URIStorage {
 
     /**
      * @notice Mint a new digital asset NFT linked to a target DID.
-     * @dev Only authorized Admin functionality may mint assets.
+     * @dev Only ADMIN_ROLE holders may mint assets.
      * @param recipient The wallet address receiving the token.
      * @param did The decentralized identifier string (e.g. "did:pehchan:wallet_123").
      * @param assetName Human-readable asset name (e.g. "Verified Contributor Credential").
@@ -184,7 +167,7 @@ contract PehchanAssetRegistry is ERC721URIStorage {
 
     /**
      * @notice Assign or transfer an existing digital asset to a new owner DID.
-     * @dev Authorized Manager or Admin functionality can allocate/transfer assets.
+     * @dev ADMIN_ROLE or MANAGER_ROLE holders can allocate/transfer assets.
      * @param tokenId The ID of the asset token to assign.
      * @param newOwner The new recipient wallet address.
      * @param newDid The new recipient's decentralized identifier string.

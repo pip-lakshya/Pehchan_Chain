@@ -37,11 +37,11 @@ async function main() {
   }
 
   // ── Configuration ──────────────────────────────────────────────────────────
-  const TOKEN_NAME   = 'PehchanChain Asset';
-  const TOKEN_SYMBOL = 'PCNA';
-
-  // The admin of the registry (defaults to deployer; can be a multisig address)
-  const INITIAL_ADMIN = process.env.ASSET_REGISTRY_ADMIN || deployerAddress;
+  // The access control hub address (required)
+  const ACCESS_CONTROL = process.env.ACCESS_CONTROL_ADDR;
+  if (!ACCESS_CONTROL) {
+    throw new Error('ACCESS_CONTROL_ADDR environment variable is required for PehchanAssetRegistry deployment.');
+  }
 
   // Address of the existing BLAuth CredentialRegistry (set to ZeroAddress if not linking yet)
   const CREDENTIAL_REGISTRY = process.env.CREDENTIAL_REGISTRY_ADDR || ethers.ZeroAddress;
@@ -49,7 +49,7 @@ async function main() {
   console.log('\n  Deployment parameters:');
   console.log(`    Token name:         ${TOKEN_NAME}`);
   console.log(`    Token symbol:       ${TOKEN_SYMBOL}`);
-  console.log(`    Initial admin:      ${INITIAL_ADMIN}`);
+  console.log(`    Access Control:     ${ACCESS_CONTROL}`);
   console.log(`    CredentialRegistry: ${CREDENTIAL_REGISTRY}`);
   console.log('');
 
@@ -60,7 +60,7 @@ async function main() {
   const registry = await PehchanAssetRegistry.deploy(
     TOKEN_NAME,
     TOKEN_SYMBOL,
-    INITIAL_ADMIN,
+    ACCESS_CONTROL,
     CREDENTIAL_REGISTRY,
   );
 

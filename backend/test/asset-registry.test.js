@@ -19,10 +19,7 @@
  * 12.  AssetAssigned event is emitted with correct args
  * 13.  DID index is updated correctly after assignment
  * 14.  totalAssets() increments correctly
- * 15.  Admin can authorize and revoke a manager
- * 16.  Revoked manager cannot assignAsset
- * 17.  Admin can transfer admin role; old admin loses privileges
- * 18.  setCredentialRegistry updates the stored address
+ * 15.  setCredentialRegistry updates the stored address
  */
 
 'use strict';
@@ -36,28 +33,41 @@ const hre = require('hardhat');
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Deploy a fresh PehchanAssetRegistry and return { contract, admin, accounts } */
+/**
+ * Deploy full stack (AccessControl hub + AssetRegistry) and return handles.
+ * Admin signer receives ADMIN_ROLE; manager receives MANAGER_ROLE.
+ */
 async function deployFresh() {
   const provider = new ethers.BrowserProvider(hre.network.provider);
 
-  // Hardhat in-process network pre-funds signers [0..19]
   const admin = await provider.getSigner(0);
   const manager = await provider.getSigner(1);
   const user1 = await provider.getSigner(2);
   const user2 = await provider.getSigner(3);
   const stranger = await provider.getSigner(4);
 
+  // Deploy PehchanAccessControl hub
+  const acArtifact = await hre.artifacts.readArtifact('PehchanAccessControl');
+  const acFactory = new ethers.ContractFactory(acArtifact.abi, acArtifact.bytecode, admin);
+  const ac = await acFactory.deploy(await admin.getAddress());
+  await ac.waitForDeployment();
+
+  // Grant ADMIN_ROLE to admin signer (deployer already has DEFAULT_ADMIN_ROLE)
+  const ADMIN_ROLE = ethers.keccak256(ethers.toUtf8Bytes('ADMIN_ROLE'));
+  await (await ac.connect(admin).grantRole(ADMIN_ROLE, await admin.getAddress())).wait();
+
+  // Deploy PehchanAssetRegistry with accessControl hub
   const artifact = await hre.artifacts.readArtifact('PehchanAssetRegistry');
   const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, admin);
   const contract = await factory.deploy(
     'PehchanAsset',
     'PCNA',
-    await admin.getAddress(),
+    await ac.getAddress(),
     ethers.ZeroAddress,
   );
   await contract.waitForDeployment();
 
-  return { contract, provider, admin, manager, user1, user2, stranger };
+  return { contract, ac, provider, admin, manager, user1, user2, stranger, ADMIN_ROLE };
 }
 
 /** Reusable mint call with default DID/asset params */
@@ -92,6 +102,7 @@ async function mintOne(contract, adminSigner, recipientAddress, did = 'did:pehch
 
 describe('PehchanAssetRegistry', () => {
   let contract;
+  let ac;
   let admin;
   let manager;
   let user1;
@@ -99,7 +110,7 @@ describe('PehchanAssetRegistry', () => {
   let stranger;
 
   before(async () => {
-    ({ contract, admin, manager, user1, user2, stranger } = await deployFresh());
+    ({ contract, ac, admin, manager, user1, user2, stranger } = await deployFresh());
   });
 
   // -------------------------------------------------------------------------
@@ -214,9 +225,10 @@ describe('PehchanAssetRegistry', () => {
     const user2Addr = await user2.getAddress();
     const managerAddr = await manager.getAddress();
 
-    // Authorize manager
-    const authTx = await contract.connect(admin).setManager(managerAddr, true);
-    await authTx.wait();
+    // Authorize manager via AccessControl hub
+    const MANAGER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('MANAGER_ROLE'));
+    const ADMIN_ROLE = ethers.keccak256(ethers.toUtf8Bytes('ADMIN_ROLE'));
+    await (await ac.connect(admin).grantRole(MANAGER_ROLE, managerAddr)).wait();
 
     const did = 'did:pehchan:wallet_mgr_src';
     const { tokenId } = await mintOne(contract, admin, user1Addr, did);
@@ -360,73 +372,7 @@ describe('PehchanAssetRegistry', () => {
   });
 
   // -------------------------------------------------------------------------
-  // 15. Admin can authorize and revoke a manager
-  // -------------------------------------------------------------------------
-  it('setManager(true) authorizes a manager; setManager(false) revokes', async () => {
-    const fresh = await deployFresh();
-    const managerAddr = await fresh.manager.getAddress();
-
-    assert.equal(await fresh.contract.isManager(managerAddr), false);
-
-    await (await fresh.contract.connect(fresh.admin).setManager(managerAddr, true)).wait();
-    assert.equal(await fresh.contract.isManager(managerAddr), true);
-
-    await (await fresh.contract.connect(fresh.admin).setManager(managerAddr, false)).wait();
-    assert.equal(await fresh.contract.isManager(managerAddr), false);
-  });
-
-  // -------------------------------------------------------------------------
-  // 16. Revoked manager cannot assignAsset
-  // -------------------------------------------------------------------------
-  it('revoked manager loses assignAsset rights', async () => {
-    const fresh = await deployFresh();
-    const user1Addr = await fresh.user1.getAddress();
-    const user2Addr = await fresh.user2.getAddress();
-    const managerAddr = await fresh.manager.getAddress();
-
-    // Authorize then immediately revoke
-    await (await fresh.contract.connect(fresh.admin).setManager(managerAddr, true)).wait();
-    await (await fresh.contract.connect(fresh.admin).setManager(managerAddr, false)).wait();
-
-    const { tokenId } = await mintOne(fresh.contract, fresh.admin, user1Addr);
-
-    await assert.rejects(
-      () => fresh.contract.connect(fresh.manager).assignAsset(
-        tokenId,
-        user2Addr,
-        'did:pehchan:wallet_revoked_mgr',
-      ),
-      /caller is not admin or manager/,
-    );
-  });
-
-  // -------------------------------------------------------------------------
-  // 17. Admin can transfer admin role
-  // -------------------------------------------------------------------------
-  it('transferAdmin transfers admin rights; old admin loses privileges', async () => {
-    const fresh = await deployFresh();
-    const newAdminAddr = await fresh.manager.getAddress();
-
-    await (await fresh.contract.connect(fresh.admin).transferAdmin(newAdminAddr)).wait();
-    assert.equal(await fresh.contract.admin(), newAdminAddr);
-
-    // Old admin can no longer mint
-    const user1Addr = await fresh.user1.getAddress();
-    await assert.rejects(
-      () => fresh.contract.connect(fresh.admin).mintAsset(
-        user1Addr,
-        'did:pehchan:wallet_old_admin',
-        'Old Admin Asset',
-        'CREDENTIAL',
-        '',
-        ethers.id('x'),
-      ),
-      /caller is not admin/,
-    );
-  });
-
-  // -------------------------------------------------------------------------
-  // 18. setCredentialRegistry updates the stored address
+  // 15. setCredentialRegistry updates the stored address
   // -------------------------------------------------------------------------
   it('setCredentialRegistry stores the new registry address', async () => {
     const fresh = await deployFresh();

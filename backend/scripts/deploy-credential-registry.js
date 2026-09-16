@@ -24,9 +24,14 @@ async function main() {
     throw new Error('Configured RPC endpoint is not Polygon Amoy.');
   }
 
+  const accessControlAddr = process.env.ACCESS_CONTROL_ADDR;
+  if (!accessControlAddr) {
+    throw new Error('ACCESS_CONTROL_ADDR is required in environment.');
+  }
+
   const signer = new Wallet(BLOCKCHAIN_PRIVATE_KEY, provider);
   const factory = new ContractFactory(artifact.abi, artifact.bytecode, signer);
-  const contract = await factory.deploy();
+  const contract = await factory.deploy(accessControlAddr);
   const deploymentTransaction = contract.deploymentTransaction();
 
   await contract.waitForDeployment();
