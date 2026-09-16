@@ -13,13 +13,14 @@ function isBlockchainEnabled() {
 }
 
 function getBlockchainConfig() {
-  const { BLOCKCHAIN_RPC_URL, BLOCKCHAIN_PRIVATE_KEY, BLOCKCHAIN_CONTRACT_ADDRESS } = process.env;
+  const { BLOCKCHAIN_RPC_URL, BLOCKCHAIN_PRIVATE_KEY, BLOCKCHAIN_CONTRACT_ADDRESS, CREDENTIAL_REGISTRY_ADDR } = process.env;
+  const contractAddress = CREDENTIAL_REGISTRY_ADDR || BLOCKCHAIN_CONTRACT_ADDRESS;
 
-  if (!BLOCKCHAIN_RPC_URL || !BLOCKCHAIN_PRIVATE_KEY || !BLOCKCHAIN_CONTRACT_ADDRESS) {
+  if (!BLOCKCHAIN_RPC_URL || !BLOCKCHAIN_PRIVATE_KEY || !contractAddress) {
     throw new Error('Blockchain configuration is incomplete.');
   }
 
-  return { rpcUrl: BLOCKCHAIN_RPC_URL, privateKey: BLOCKCHAIN_PRIVATE_KEY, contractAddress: BLOCKCHAIN_CONTRACT_ADDRESS };
+  return { rpcUrl: BLOCKCHAIN_RPC_URL, privateKey: BLOCKCHAIN_PRIVATE_KEY, contractAddress };
 }
 
 async function getContract() {
