@@ -8,6 +8,16 @@ const polygonAmoy = {
 const networks = process.env.BLOCKCHAIN_RPC_URL ? { polygonAmoy } : {};
 
 module.exports = {
-  solidity: '0.8.24',
+  solidity: {
+    version: '0.8.24',
+    settings: {
+      evmVersion: 'cancun',
+      viaIR: true,
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
+  },
   networks,
 };
