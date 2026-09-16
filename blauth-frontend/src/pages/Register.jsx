@@ -124,6 +124,18 @@ function Register() {
 
   const canEnroll = modelsState === "ready" && cameraState === "ready" && !["capturing", "enrolled"].includes(enrollmentState);
 
+  function handleFillDemo() {
+    setFormData({
+      name: "Rajesh Kumar",
+      email: "rajesh.kumar@bel.co.in",
+      college: "Bharat Electronics Training Institute",
+      studentId: "BEL-2026-001",
+      dob: "2002-05-15",
+      phone: "+919876543210",
+    });
+    setErrors({});
+  }
+
   return (
     <main className="blauth-register">
       <div className="blauth-register-orb blauth-register-orb-one" /><div className="blauth-register-orb blauth-register-orb-two" />
@@ -135,7 +147,15 @@ function Register() {
         <div className="blauth-register-card">
           <ol className="blauth-register-progress" aria-label="Registration progress"><li className="is-active"><span>1</span><strong>Registration</strong></li><li><span>2</span><strong>Face Verification</strong></li><li><span>3</span><strong>Wallet</strong></li></ol>
           <form className="blauth-register-form" noValidate onSubmit={handleSubmit}>
-            <div className="blauth-form-heading"><h2>Your details</h2><p>All fields are required.</p></div>
+            <div className="blauth-form-heading">
+              <div>
+                <h2>Your details</h2>
+                <p>All fields are required.</p>
+              </div>
+              <button type="button" className="blauth-did-copy-btn" onClick={handleFillDemo} style={{ padding: "6px 12px", fontSize: "11px" }}>
+                ⚡ Auto-Fill Demo Profile
+              </button>
+            </div>
             <div className="blauth-form-grid">{fields.map((field) => { const error = errors[field.name]; return <div className={`blauth-input-group${field.wide ? " is-wide" : ""}`} key={field.name}><label htmlFor={field.name}>{field.label}</label><input {...field} id={field.name} value={formData[field.name]} onChange={handleChange} aria-invalid={Boolean(error)} aria-describedby={error ? `${field.name}-error` : undefined} />{error && <p className="blauth-field-error" id={`${field.name}-error`} role="alert">{error}</p>}</div>; })}</div>
             <section className="blauth-enrollment-block" aria-labelledby="enrollment-title">
               <div className="blauth-form-heading"><h2 id="enrollment-title">Enroll your face</h2><p>Stored on this device only.</p></div>

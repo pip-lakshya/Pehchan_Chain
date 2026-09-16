@@ -6,6 +6,10 @@ import FaceVerify from "./pages/FaceVerify";
 import Wallet from "./pages/Wallet";
 import DisclosureHistory from "./pages/DisclosureHistory";
 import DeveloperDashboard from "./pages/DeveloperDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import ManagerPanel from "./pages/ManagerPanel";
+import VerifierPortal from "./pages/VerifierPortal";
+import AuditTrail from "./pages/AuditTrail";
 import AuthOverlay from "./pages/AuthOverlay";
 import TopNavbar from "./components/TopNavbar";
 
@@ -19,6 +23,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify" element={<FaceVerify />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/manager" element={<ManagerPanel />} />
+          <Route path="/verifier" element={<VerifierPortal />} />
+          <Route path="/audit" element={<AuditTrail />} />
           <Route path="/history" element={<DisclosureHistory />} />
           <Route path="/developer" element={<DeveloperDashboard />} />
           <Route path="/authenticate" element={<AuthOverlay />} />

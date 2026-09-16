@@ -61,6 +61,18 @@ async function getCredentialStatus(credentials) {
 }
 
 async function getCredentialStatusByHash(credentialHash) {
+  if (!isBlockchainEnabled()) {
+    const { getWalletStore } = require('./walletStore');
+    const wallet = await getWalletStore().findByBiometricCommitment(credentialHash);
+    return {
+      credentialHash,
+      isRegistered: Boolean(wallet),
+      walletAddress: wallet ? wallet.walletId : null,
+      registeredAt: wallet ? wallet.createdAt : null,
+      revoked: false,
+    };
+  }
+
   const contract = await getContract();
   const isRegistered = await contract.isCredentialRegistered(credentialHash);
 

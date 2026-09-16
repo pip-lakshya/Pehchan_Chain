@@ -207,3 +207,57 @@ export async function getAssetsByIdentity(did) {
   if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
   return responseBody.data;
 }
+
+export async function assignRole({ targetDID, role }) {
+  const response = await fetch(`${API_BASE_URL}/role/assign`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ targetDID, role }),
+  });
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody.data;
+}
+
+export async function revokeRole({ targetDID, role }) {
+  const response = await fetch(`${API_BASE_URL}/role/revoke`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ targetDID, role }),
+  });
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody.data;
+}
+
+export async function getRolesForDID(did) {
+  const response = await fetch(`${API_BASE_URL}/role/${encodeURIComponent(did)}`);
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody.data;
+}
+
+/**
+ * getVerificationRequestStatus — polls GET /verify/request/:requestId.
+ *
+ * Returns the request's public-safe status record.
+ * Wallet credentials are never exposed through this endpoint;
+ * approved disclosed data is only present when status === "APPROVED"
+ * (i.e. after the user has completed consent on their device).
+ */
+export async function getVerificationRequestStatus(requestId) {
+  if (!requestId) throw new Error("A request ID is required.");
+  const response = await fetch(`${API_BASE_URL}/verify/request/${encodeURIComponent(requestId)}`);
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody;
+}
+
+export async function getAuditLogsForDID(did) {
+  if (!did) throw new Error("A DID is required to query audit logs.");
+  const response = await fetch(`${API_BASE_URL}/audit/log/${encodeURIComponent(did)}`);
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(getErrorMessage(responseBody, response.status));
+  return responseBody.data;
+}
+

@@ -226,6 +226,10 @@ function Wallet() {
           </footer>
 
           <div className="blauth-wallet-history-link">
+            <Link to="/audit">View full PehchanChain audit trail (on-chain &amp; disclosures) <span>→</span></Link>
+          </div>
+
+          <div className="blauth-wallet-history-link" style={{ borderTop: "0", paddingTop: "0" }}>
             <Link to="/history">View disclosure history <span>→</span></Link>
           </div>
 

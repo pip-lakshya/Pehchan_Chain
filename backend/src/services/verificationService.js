@@ -1,3 +1,26 @@
+/**
+ * verificationService.js — Unified Verification Engine
+ *
+ * Core business logic for BLAuth's Selective-Disclosure Verification Engine.
+ * Serves as the single unified engine for both request sources:
+ *   - Mode 1: Manual Verifier Portal (human-operated /verify/request)
+ *   - Mode 2: Developer SDK (API-key authenticated /developer/verify)
+ *
+ * Architecture:
+ *             ┌──────────────────────┐
+ *             │ Unified Verification │
+ *             │       Engine         │
+ *             └──────────┬───────────┘
+ *                        │
+ *             ┌──────────┴──────────┐
+ *             │                     │
+ *      Manual Verifier        Developer SDK
+ *         Mode 1                  Mode 2
+ *
+ * Both modes share the exact same consent, selective-disclosure,
+ * disclosure logging, and approval semantics.
+ */
+
 const { createVerificationRequest: createVerificationRequestRecord } = require('../models/verificationRequest');
 const { createDisclosureHistoryEntry } = require('../models/disclosureHistory');
 const { isAgeOver18 } = require('../utils/age');
@@ -101,4 +124,78 @@ async function processConsent(payload) {
   return { data, outcome };
 }
 
-module.exports = { createVerificationRequest, processConsent };
+/**
+ * fetchRequestStatus — safe polling endpoint for verifier portals.
+ *
+ * Returns only public-safe metadata about the request:
+ *   - requestId, status, verifierId, requestedFields, createdAt
+ *
+ * If status is APPROVED, it additionally returns the selectively-disclosed
+ * data that the user explicitly approved via POST /verify/consent.
+ * This data is read from the wallet's disclosureHistory (what the user already
+ * chose to share) — NOT from raw wallet.credentials.
+ *
+ * If status is DENIED or PENDING, no credential values are returned.
+ */
+async function fetchRequestStatus(requestId) {
+  if (typeof requestId !== 'string' || !requestId.trim()) {
+    const error = new Error('requestId is required.');
+    error.status = 400;
+    throw error;
+  }
+
+  const requestStore = getVerificationRequestStore();
+  const verificationRequest = await requestStore.findByRequestId(requestId.trim());
+
+  if (!verificationRequest) {
+    const error = new Error('requestId does not exist.');
+    error.status = 404;
+    throw error;
+  }
+
+  // Always-safe public fields — contains no credential data
+  const publicFields = {
+    requestId:       verificationRequest.requestId,
+    status:          verificationRequest.status,
+    verifierId:      verificationRequest.verifierId,
+    requestedFields: verificationRequest.requestedFields,
+    createdAt:       verificationRequest.createdAt,
+  };
+
+  if (verificationRequest.status === 'APPROVED') {
+    // Pull approved data from the wallet's disclosure history — this is data
+    // the user already explicitly shared; reading it here is safe and correct.
+    const walletStore = getWalletStore();
+    const wallet = await walletStore.findByWalletId(verificationRequest.walletId);
+
+    if (wallet) {
+      const historyEntry = [...wallet.disclosureHistory]
+        .reverse()
+        .find((entry) => entry.requestId === requestId.trim());
+
+      if (historyEntry) {
+        // Build disclosed data from approved fields only (never full credentials)
+        const disclosedData = {};
+        const { isAgeOver18 } = require('../utils/age');
+        for (const field of historyEntry.disclosedFields || []) {
+          disclosedData[field] = field === 'ageOver18'
+            ? isAgeOver18(wallet.credentials.dob)
+            : wallet.credentials[field];
+        }
+        publicFields.disclosedFields  = historyEntry.disclosedFields  || [];
+        publicFields.withheldFields   = historyEntry.withheldFields   || [];
+        publicFields.disclosedData    = disclosedData;
+      }
+    }
+  }
+
+  if (verificationRequest.status === 'DENIED') {
+    publicFields.disclosedFields = [];
+    publicFields.withheldFields  = verificationRequest.requestedFields;
+    publicFields.disclosedData   = {};
+  }
+
+  return publicFields;
+}
+
+module.exports = { createVerificationRequest, processConsent, fetchRequestStatus };

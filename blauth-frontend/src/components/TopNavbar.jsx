@@ -4,6 +4,10 @@ const links = [
   { to: "/", label: "Home" },
   { to: "/register", label: "Create Identity" },
   { to: "/wallet", label: "Wallet" },
+  { to: "/admin", label: "Admin Console" },
+  { to: "/manager", label: "Manager Panel" },
+  { to: "/verifier", label: "Verifier Portal" },
+  { to: "/audit", label: "Audit Trail" },
   { to: "/developer", label: "Developer Console" },
 ];
 

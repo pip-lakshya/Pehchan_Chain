@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "seed": "node scripts/seed-demo.js",
     "test": "node --test",
     "compile:contract": "hardhat compile",
     "deploy:amoy": "node scripts/deploy-credential-registry.js",
