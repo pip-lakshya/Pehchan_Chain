@@ -5,6 +5,7 @@ const identityRoutes = require('./routes/identityRoutes');
 const developerRoutes = require('./routes/developerRoutes');
 const verificationRoutes = require('./routes/verificationRoutes');
 const assetRoutes = require('./routes/assetRoutes');
+const roleRoutes = require('./routes/roleRoutes');
 
 const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN
@@ -25,6 +26,7 @@ app.use('/identity', identityRoutes);
 app.use('/developer', developerRoutes);
 app.use('/verify', verificationRoutes);
 app.use('/asset', assetRoutes);
+app.use('/role', roleRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

@@ -265,6 +265,30 @@ function validateTransferAsset(payload) {
   return { tokenId, recipient, targetDID };
 }
 
+const supportedRoles = new Set(['ADMIN', 'MANAGER', 'AUDITOR', 'USER']);
+
+function validateRole(role) {
+  if (typeof role !== 'string' || role.trim() === '') {
+    throw new ValidationError('role is required.');
+  }
+  const clean = role.trim().toUpperCase();
+  if (!supportedRoles.has(clean)) {
+    throw new ValidationError(`Invalid role: '${role}'. Allowed roles are: ADMIN, MANAGER, AUDITOR, USER.`);
+  }
+  return clean;
+}
+
+function validateRolePayload(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new ValidationError('Request body must be a JSON object.');
+  }
+
+  const targetDID = validateDID(payload.targetDID || payload.did || payload.account, 'targetDID');
+  const role = validateRole(payload.role);
+
+  return { targetDID, role };
+}
+
 module.exports = {
   ValidationError,
   validateRegistration,
@@ -277,4 +301,6 @@ module.exports = {
   validateTokenId,
   validateMintAsset,
   validateTransferAsset,
+  validateRole,
+  validateRolePayload,
 };
