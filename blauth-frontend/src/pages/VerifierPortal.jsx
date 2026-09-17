@@ -568,7 +568,7 @@ function VerifierPortal() {
                 </div>
                 <p className="blauth-admin-help-text">
                   A verification request has been created. The user must open the{" "}
-                  <strong>BLAuth Wallet</strong> on their device, review the request,
+                  <strong>PehchanChain Wallet</strong> on their device, review the request,
                   and complete biometric confirmation to share their identity.
                 </p>
               </div>
@@ -606,7 +606,7 @@ function VerifierPortal() {
                     🔔 Instruct the user to:
                   </p>
                   <ol className="blauth-verifier-instruction-list">
-                    <li>Open the <strong>BLAuth Wallet</strong> on their device.</li>
+                    <li>Open the <strong>PehchanChain Wallet</strong> on their device.</li>
                     <li>
                       Navigate to{" "}
                       <code className="blauth-manager-code">/consent</code> with their

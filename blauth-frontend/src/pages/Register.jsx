@@ -171,7 +171,7 @@ function Register() {
               <p className={`blauth-enrollment-message${enrollmentState === "error" ? " is-error" : ""}`} role={enrollmentState === "error" ? "alert" : undefined}>{enrollmentMessage}</p>
               {enrollmentState !== "enrolled" && <button className="blauth-enroll-button" type="button" disabled={!canEnroll} onClick={captureEnrollmentFace}>{enrollmentState === "capturing" ? "Enrolling…" : "Capture enrollment face"}</button>}
             </section>
-            <aside className="blauth-privacy-notice"><span aria-hidden="true">⌁</span><p><strong>Your biometric data stays on your device.</strong> BLAuth only moves forward with details you approve.</p></aside>
+            <aside className="blauth-privacy-notice"><span aria-hidden="true">⌁</span><p><strong>Your biometric data stays on your device.</strong> PehchanChain only moves forward with details you approve.</p></aside>
             <div className="blauth-register-actions"><button className="blauth-back-button" type="button" onClick={() => navigate("/")}>← Back</button><button className="blauth-continue-button" type="submit">Continue <span>→</span></button></div>
           </form>
         </div>

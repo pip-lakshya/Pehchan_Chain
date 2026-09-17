@@ -89,7 +89,7 @@ function Home() {
         <div className="blauth-flow-intro">
           <p className="blauth-kicker">A clear path</p>
           <h2 id="blauth-flow-title">You decide what<br />moves forward.</h2>
-          <p>BLAuth keeps each identity interaction simple, visible, and in your hands.</p>
+          <p>PehchanChain keeps each identity interaction simple, visible, and in your hands.</p>
         </div>
         <ol className="blauth-flow">
           {["Face Verification", "Identity Wallet", "Consent", "Only Approved Data", "Verifier"].map((step, index) => (

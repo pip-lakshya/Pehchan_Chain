@@ -114,14 +114,14 @@ function Wallet() {
       <div className="blauth-register-orb blauth-wallet-orb-one" /><div className="blauth-register-orb blauth-wallet-orb-two" />
       <nav className="blauth-register-nav" aria-label="Wallet navigation"><Link className="blauth-brand" to="/"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> Private identity wallet</span></nav>
       <section className="blauth-wallet-shell">
-        <header className="blauth-wallet-intro"><p className="blauth-eyebrow"><span /> Step 3 of 3</p><h1>Your identity,<br /><em>in your hands.</em></h1><p>These details stay in your local BLAuth wallet until you choose what to share.</p></header>
+        <header className="blauth-wallet-intro"><p className="blauth-eyebrow"><span /> Step 3 of 3</p><h1>Your identity,<br /><em>in your hands.</em></h1><p>These details stay in your local PehchanChain wallet until you choose what to share.</p></header>
         
         <article className="blauth-wallet-card">
           <header className="blauth-wallet-card-header">
             <div>
-              <span className="blauth-wallet-card-mark">B</span>
+              <span className="blauth-wallet-card-mark">P</span>
               <div>
-                <p>BLAuth Identity</p>
+                <p>PehchanChain Identity</p>
                 <h2>{identity.name || "Your identity"}</h2>
               </div>
             </div>
@@ -222,7 +222,7 @@ function Wallet() {
 
           <footer className="blauth-wallet-footer">
             <span aria-hidden="true">⌁</span>
-            <p>Your identity & on-chain digital assets are loaded from your BLAuth wallet.</p>
+            <p>Your identity &amp; on-chain digital assets are loaded from your PehchanChain wallet.</p>
           </footer>
 
           <div className="blauth-wallet-history-link">
