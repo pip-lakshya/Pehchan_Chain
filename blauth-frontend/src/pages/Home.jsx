@@ -4,19 +4,25 @@ const features = [
   {
     title: "Local Biometric Verification",
     description:
-      "Face verification runs in your browser. Your raw biometric data and face embeddings stay on your device.",
+      "Face verification runs in your browser using local neural models. Your raw biometric data and face embeddings never leave your device.",
     icon: "face",
   },
   {
-    title: "Selective Disclosure",
+    title: "Selective Disclosure Engine",
     description:
-      "Share only the identity fields a verifier requests and you choose to approve.",
+      "Share only the identity fields a verifier explicitly requests and you choose to approve. Unapproved fields are stripped server-side.",
     icon: "sliders",
   },
   {
-    title: "Explicit User Consent",
+    title: "Smart-Contract RBAC & NFTs",
     description:
-      "Every disclosure is reviewed by you first. Nothing is shared without clear approval.",
+      "Role permissions (Admin/Manager) and digital credential NFTs are enforced immutably on Solidity smart contracts.",
+    icon: "shield",
+  },
+  {
+    title: "Polygon Amoy Audit Trail",
+    description:
+      "Every identity creation, asset minting, role assignment, and selective disclosure produces a verifiable blockchain audit log.",
     icon: "check",
   },
 ];
@@ -25,6 +31,7 @@ function FeatureIcon({ type }) {
   const paths = {
     face: <><rect x="4" y="3" width="16" height="18" rx="6" /><path d="M8 11h.01M16 11h.01M9 15c1.8 1.3 4.2 1.3 6 0" /></>,
     sliders: <><path d="M4 7h16M4 17h16M9 4v6M15 14v6" /></>,
+    shield: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></>,
     check: <><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" /><path d="m8.5 12 2.3 2.3 4.7-5" /></>,
   };
 
@@ -46,25 +53,26 @@ function Home() {
             <span className="blauth-brand-mark">P</span>
             <span>PehchanChain</span>
           </Link>
-          <span className="blauth-nav-status"><i /> Privacy-first identity</span>
+          <span className="blauth-nav-status"><i /> Polygon Amoy Testnet (Chain 80002)</span>
         </nav>
 
         <div className="blauth-hero-content">
-          <p className="blauth-eyebrow"><span /> Private identity, by design</p>
+          <p className="blauth-eyebrow"><span /> Decentralized Identity &amp; Digital Asset Layer</p>
           <h1>Your Identity.<br /><em>Your Control.</em></h1>
-          <p className="blauth-hero-copy">Verify locally. Share selectively. Stay in control.</p>
+          <p className="blauth-hero-copy">Verify locally. Share selectively. Anchor on Polygon Amoy.</p>
           <div className="blauth-actions">
             <Link className="blauth-button blauth-button-primary" to="/register">Create Identity <span>→</span></Link>
             <Link className="blauth-button blauth-button-secondary" to="/wallet">Open Wallet</Link>
             <Link className="blauth-button blauth-button-secondary" to="/developer">Developer Console</Link>
           </div>
-          <p className="blauth-trust"><span>✓</span> Your biometric data never leaves your device.</p>
+          <p className="blauth-trust"><span>✓</span> Zero raw biometric data transmitted or written to chain.</p>
         </div>
 
         <div className="blauth-identity-preview" aria-label="Local verification is active">
           <div className="blauth-preview-top"><span className="blauth-live-dot" /> Local verification</div>
           <div className="blauth-face-scan"><div className="blauth-scan-line" /><div className="blauth-face-outline" /></div>
           <div className="blauth-preview-bottom"><span>BIOMETRIC</span><strong>ON DEVICE</strong></div>
+          <div className="blauth-preview-chain-badge"><span>⛓ Polygon Amoy Verified</span></div>
         </div>
       </section>
 
