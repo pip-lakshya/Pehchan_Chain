@@ -48,13 +48,9 @@ function Home() {
       <section className="blauth-hero">
         <div className="blauth-orb blauth-orb-one" />
         <div className="blauth-orb blauth-orb-two" />
-        <nav className="blauth-nav" aria-label="Primary navigation">
-          <Link className="blauth-brand" to="/" aria-label="PehchanChain home">
-            <span className="blauth-brand-mark">P</span>
-            <span>PehchanChain</span>
-          </Link>
+        <div className="blauth-nav" aria-label="Status bar">
           <span className="blauth-nav-status"><i /> Polygon Amoy Testnet (Chain 80002)</span>
-        </nav>
+        </div>
 
         <div className="blauth-hero-content">
           <p className="blauth-eyebrow"><span /> Decentralized Identity &amp; Digital Asset Layer</p>

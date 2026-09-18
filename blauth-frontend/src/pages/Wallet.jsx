@@ -95,7 +95,7 @@ function Wallet() {
   if (walletState !== "ready" || !identity) {
     return (
       <main className="blauth-wallet">
-        <nav className="blauth-register-nav" aria-label="Wallet navigation"><Link className="blauth-brand" to="/"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> Privacy-first identity</span></nav>
+        <nav className="blauth-register-nav" aria-label="Wallet navigation"><span className="blauth-nav-status"><i /> Privacy-first identity</span></nav>
         <section className="blauth-wallet-empty"><span className="blauth-wallet-empty-mark" aria-hidden="true">B</span><p className="blauth-eyebrow"><span /> Your private wallet</p><h1>{walletState === "loading" ? <>Loading your<br /><em>identity.</em></> : <>No backend<br /><em>wallet found.</em></>}</h1><p>{walletState === "loading" ? "Retrieving your identity wallet." : walletState === "error" ? walletError : "Complete local face verification to register your backend wallet."}</p><Link className="blauth-button blauth-button-primary" to="/register">Create Identity <span>→</span></Link></section>
       </main>
     );
@@ -112,7 +112,7 @@ function Wallet() {
   return (
     <main className="blauth-wallet">
       <div className="blauth-register-orb blauth-wallet-orb-one" /><div className="blauth-register-orb blauth-wallet-orb-two" />
-      <nav className="blauth-register-nav" aria-label="Wallet navigation"><Link className="blauth-brand" to="/"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> Private identity wallet</span></nav>
+      <nav className="blauth-register-nav" aria-label="Wallet navigation"><span className="blauth-nav-status"><i /> Private identity wallet</span></nav>
       <section className="blauth-wallet-shell">
         <header className="blauth-wallet-intro"><p className="blauth-eyebrow"><span /> Step 3 of 3</p><h1>Your identity,<br /><em>in your hands.</em></h1><p>These details stay in your local PehchanChain wallet until you choose what to share.</p></header>
         

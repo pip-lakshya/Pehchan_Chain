@@ -28,14 +28,14 @@ function VerifierAge() {
   }
 
   if (!walletId) {
-    return <main className="blauth-consent"><nav className="blauth-register-nav" aria-label="Age verifier navigation"><Link className="blauth-brand" to="/" aria-label="PehchanChain home"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link></nav><section className="blauth-consent-empty" aria-labelledby="age-empty-title"><p className="blauth-eyebrow"><span /> Derived disclosure</p><h1 id="age-empty-title">No backend<br /><em>wallet found.</em></h1><p>Complete local face verification to register your backend wallet before checking age eligibility.</p><Link className="blauth-button blauth-button-primary" to="/register">Create Identity <span>→</span></Link></section></main>;
+    return <main className="blauth-consent"><section className="blauth-consent-empty" aria-labelledby="age-empty-title"><p className="blauth-eyebrow"><span /> Derived disclosure</p><h1 id="age-empty-title">No backend<br /><em>wallet found.</em></h1><p>Complete local face verification to register your backend wallet before checking age eligibility.</p><Link className="blauth-button blauth-button-primary" to="/register">Create Identity <span>→</span></Link></section></main>;
   }
 
   if (result) {
     const isEligible = result.ageOver18;
     return (
       <main className="blauth-consent">
-        <nav className="blauth-register-nav" aria-label="Age verifier navigation"><Link className="blauth-brand" to="/" aria-label="PehchanChain home"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> Derived data only</span></nav>
+        <nav className="blauth-register-nav" aria-label="Age verifier navigation"><span className="blauth-nav-status"><i /> Derived data only</span></nav>
         <section className="blauth-consent-shell" aria-labelledby="age-result-title">
           <header className="blauth-consent-intro"><p className="blauth-eyebrow"><span /> Age verification complete</p><h1 id="age-result-title">Age checked,<br /><em>privacy kept.</em></h1><p>The service received only an eligibility result, never your date of birth.</p></header>
           <article className="blauth-consent-card blauth-disclosure-result">
@@ -54,7 +54,7 @@ function VerifierAge() {
   return (
     <main className="blauth-consent">
       <div className="blauth-register-orb blauth-consent-orb-one" /><div className="blauth-register-orb blauth-consent-orb-two" />
-      <nav className="blauth-register-nav" aria-label="Age verifier navigation"><Link className="blauth-brand" to="/" aria-label="PehchanChain home"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> Derived data only</span></nav>
+      <nav className="blauth-register-nav" aria-label="Age verifier navigation"><span className="blauth-nav-status"><i /> Derived data only</span></nav>
       <section className="blauth-consent-shell" aria-labelledby="age-title">
           <header className="blauth-consent-intro"><p className="blauth-eyebrow"><span /> Derived disclosure</p><h1 id="age-title">Prove your age,<br /><em>not your birthday.</em></h1><p>PehchanChain derives this result from your identity wallet without sharing your date of birth or any other identity detail.</p></header>
         <article className="blauth-consent-card">

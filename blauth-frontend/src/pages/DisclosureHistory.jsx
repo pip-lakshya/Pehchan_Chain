@@ -56,7 +56,7 @@ function DisclosureHistory() {
   return (
     <main className="blauth-history">
       <div className="blauth-register-orb blauth-history-orb-one" /><div className="blauth-register-orb blauth-history-orb-two" />
-      <nav className="blauth-register-nav" aria-label="Disclosure history navigation"><Link className="blauth-brand" to="/" aria-label="PehchanChain home"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> Your disclosure record</span></nav>
+      <nav className="blauth-register-nav" aria-label="Disclosure history navigation"><span className="blauth-nav-status"><i /> Your disclosure record</span></nav>
       <section className="blauth-history-shell" aria-labelledby="history-title">
         <header className="blauth-history-intro"><p className="blauth-eyebrow"><span /> Your activity</p><h1 id="history-title">Disclosure<br /><em>history.</em></h1><p>Every backend disclosure decision is recorded here so you can see exactly what was approved.</p></header>
         <div className="blauth-history-card">

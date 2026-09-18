@@ -196,12 +196,6 @@ function Consent() {
   if (stage === "complete" && result) {
     return (
       <main className="blauth-consent">
-        <nav className="blauth-register-nav">
-          <Link className="blauth-brand" to="/">
-            <span className="blauth-brand-mark">P</span>
-            <span>PehchanChain</span>
-          </Link>
-        </nav>
         <section className="blauth-consent-shell">
           <article className="blauth-consent-card blauth-disclosure-result">
             <div className="blauth-result-mark">
@@ -254,10 +248,6 @@ function Consent() {
   return (
     <main className="blauth-consent">
       <nav className="blauth-register-nav">
-        <Link className="blauth-brand" to="/">
-          <span className="blauth-brand-mark">P</span>
-          <span>PehchanChain</span>
-        </Link>
         <span className="blauth-nav-status">
           <i /> PehchanChain Central Consent Engine
         </span>

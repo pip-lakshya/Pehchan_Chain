@@ -4,7 +4,7 @@ function VerifierCollege() {
   return (
     <main className="blauth-consent">
       <div className="blauth-register-orb blauth-consent-orb-one" /><div className="blauth-register-orb blauth-consent-orb-two" />
-      <nav className="blauth-register-nav" aria-label="College verifier navigation"><Link className="blauth-brand" to="/" aria-label="PehchanChain home"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> Consent required</span></nav>
+      <nav className="blauth-register-nav" aria-label="College verifier navigation"><span className="blauth-nav-status"><i /> Consent required</span></nav>
       <section className="blauth-consent-shell" aria-labelledby="college-verifier-title">
         <header className="blauth-consent-intro"><p className="blauth-eyebrow"><span /> College verifier</p><h1 id="college-verifier-title">Confirm student<br /><em>access.</em></h1><p>College Portal requests only the details needed to confirm your student account for campus access.</p></header>
         <article className="blauth-consent-card">

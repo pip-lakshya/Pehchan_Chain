@@ -140,7 +140,7 @@ function Register() {
     <main className="blauth-register">
       <div className="blauth-register-orb blauth-register-orb-one" /><div className="blauth-register-orb blauth-register-orb-two" />
       <nav className="blauth-register-nav" aria-label="Registration navigation">
-        <Link className="blauth-brand" to="/" aria-label="PehchanChain home"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> Privacy-first identity</span>
+        <span className="blauth-nav-status"><i /> Privacy-first identity</span>
       </nav>
       <section className="blauth-register-shell" aria-labelledby="register-title">
         <header className="blauth-register-intro"><p className="blauth-eyebrow"><span /> Step 1 of 3</p><h1 id="register-title">Create your<br /><em>identity.</em></h1><p>Start with the details you choose to keep in your private identity wallet.</p></header>
