@@ -93,7 +93,7 @@ function AuthOverlay() {
 
   return (
     <main className="blauth-verify">
-      <nav className="blauth-register-nav"><Link className="blauth-brand" to="/"><span className="blauth-brand-mark">P</span><span>PehchanChain</span></Link><span className="blauth-nav-status"><i /> User authentication surface</span></nav>
+      <nav className="blauth-register-nav"><span className="blauth-nav-status"><i /> User authentication surface</span></nav>
       <section className="blauth-verify-shell">
         <header className="blauth-register-intro"><p className="blauth-eyebrow"><span /> PehchanChain-controlled surface</p><h1>Authenticate<br /><em>with PehchanChain.</em></h1><p><strong>{request.verifier}</strong> wants to verify your identity. It cannot access biometric data, API credentials, or fields you do not approve.</p></header>
         <article className="blauth-verify-card">

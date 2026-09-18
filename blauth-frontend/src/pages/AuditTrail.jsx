@@ -102,10 +102,6 @@ function AuditTrail() {
       <div className="blauth-register-orb blauth-history-orb-two" />
 
       <nav className="blauth-register-nav" aria-label="Audit navigation">
-        <Link className="blauth-brand" to="/">
-          <span className="blauth-brand-mark">P</span>
-          <span>PehchanChain</span>
-        </Link>
         <span className="blauth-nav-status">
           <i /> PehchanChain Immutable Audit Log
         </span>

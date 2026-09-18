@@ -117,10 +117,6 @@ function DeveloperDashboard() {
   return (
     <main className="blauth-consent">
       <nav className="blauth-register-nav" aria-label="Developer navigation">
-        <Link className="blauth-brand" to="/">
-          <span className="blauth-brand-mark">P</span>
-          <span>PehchanChain</span>
-        </Link>
         <span className="blauth-nav-status">
           <i /> PehchanChain SDK &amp; Developer Console (Mode 2)
         </span>
