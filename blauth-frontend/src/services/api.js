@@ -1,6 +1,12 @@
 // Production uses the same origin through a reverse proxy. Set VITE_API_BASE_URL
 // only when the API is intentionally deployed on a separate origin.
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const DEFAULT_DEV_API_URL = "http://localhost:3001";
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL !== undefined && import.meta.env.VITE_API_BASE_URL !== ""
+    ? import.meta.env.VITE_API_BASE_URL
+    : (import.meta.env.DEV ? DEFAULT_DEV_API_URL : "")
+).replace(/\/$/, "");
+
 
 function getErrorMessage(responseBody, status) {
   if (responseBody && typeof responseBody === "object") {
