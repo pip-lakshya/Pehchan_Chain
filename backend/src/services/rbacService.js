@@ -39,10 +39,58 @@ function resolveAddressFromDID(targetDID) {
   );
 }
 
-// In-memory mock store for offline testing
+const fs = require('fs');
+const path = require('path');
+
+const ROLES_FILE_PATH = path.resolve(__dirname, '../../data/roles.json');
+
+// Persistent role store for offline / local mode
 class MockRoleStore {
   constructor() {
     this.rolesMap = new Map(); // address => Set of role names ('ADMIN', 'MANAGER', 'AUDITOR', 'USER')
+    this.loadFromDisk();
+    this.seedDefaults();
+  }
+
+  loadFromDisk() {
+    try {
+      if (fs.existsSync(ROLES_FILE_PATH)) {
+        const raw = fs.readFileSync(ROLES_FILE_PATH, 'utf8');
+        const obj = JSON.parse(raw);
+        for (const [account, rolesArray] of Object.entries(obj)) {
+          this.rolesMap.set(account, new Set(rolesArray));
+        }
+      }
+    } catch (err) {
+      console.warn('[MockRoleStore] Error loading roles from disk:', err.message);
+    }
+  }
+
+  saveToDisk() {
+    try {
+      const dir = path.dirname(ROLES_FILE_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      const obj = {};
+      for (const [account, roleSet] of this.rolesMap.entries()) {
+        obj[account] = Array.from(roleSet);
+      }
+      fs.writeFileSync(ROLES_FILE_PATH, JSON.stringify(obj, null, 2), 'utf8');
+    } catch (err) {
+      console.warn('[MockRoleStore] Error saving roles to disk:', err.message);
+    }
+  }
+
+  seedDefaults() {
+    const adminAcct = resolveAddressFromDID('did:pehchan:admin_workspace');
+    if (!this.rolesMap.has(adminAcct)) {
+      this.rolesMap.set(adminAcct, new Set(['ADMIN', 'MANAGER', 'AUDITOR', 'USER']));
+    }
+    const mgrAcct = resolveAddressFromDID('did:pehchan:manager_workspace');
+    if (!this.rolesMap.has(mgrAcct)) {
+      this.rolesMap.set(mgrAcct, new Set(['MANAGER', 'USER']));
+    }
   }
 
   assignRole(targetDID, role) {
@@ -51,6 +99,7 @@ class MockRoleStore {
       this.rolesMap.set(account, new Set());
     }
     this.rolesMap.get(account).add(role);
+    this.saveToDisk();
 
     return {
       targetDID,
@@ -65,6 +114,7 @@ class MockRoleStore {
     const account = resolveAddressFromDID(targetDID);
     if (this.rolesMap.has(account)) {
       this.rolesMap.get(account).delete(role);
+      this.saveToDisk();
     }
 
     return {
@@ -94,6 +144,8 @@ class MockRoleStore {
 
   reset() {
     this.rolesMap.clear();
+    this.seedDefaults();
+    this.saveToDisk();
   }
 }
 
