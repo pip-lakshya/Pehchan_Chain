@@ -138,13 +138,16 @@ async function mintAsset(payload) {
     }
   }
 
+  const localResult = mockStore.mint(payload);
+
   if (!isBlockchainEnabled()) {
-    return mockStore.mint(payload);
+    return localResult;
   }
 
   try {
     const receipt = await mintAssetOnChain(payload);
     return {
+      tokenId: localResult.tokenId,
       recipient: payload.recipient,
       targetDID: payload.targetDID,
       transactionHash: receipt.transactionHash,
@@ -156,7 +159,8 @@ async function mintAsset(payload) {
       err.status = 403;
       throw err;
     }
-    throw error;
+    console.warn('[assetService] On-chain mintAsset failed, using local fallback:', error.message);
+    return { ...localResult, offlineFallback: true };
   }
 }
 
@@ -171,8 +175,10 @@ async function transferAsset(payload) {
     }
   }
 
+  const localResult = mockStore.transfer(payload);
+
   if (!isBlockchainEnabled()) {
-    return mockStore.transfer(payload);
+    return localResult;
   }
 
   try {
@@ -190,7 +196,8 @@ async function transferAsset(payload) {
       err.status = 403;
       throw err;
     }
-    throw error;
+    console.warn('[assetService] On-chain transferAsset failed, using local fallback:', error.message);
+    return { ...localResult, offlineFallback: true };
   }
 }
 

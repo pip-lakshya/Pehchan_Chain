@@ -84,19 +84,34 @@ async function getAccessControlContract() {
 }
 
 /** Mint a new PehchanChain digital asset */
-async function mintAssetOnChain({ to, targetDID, name, category, ipfsHash, payloadHash }) {
+async function mintAssetOnChain({ to, recipient, targetDID, name, category, ipfsHash, payloadHash }) {
   if (!isBlockchainEnabled()) return null;
+  const destinationAddress = to || recipient;
+  if (!destinationAddress) {
+    throw new Error('Recipient address is required for minting on-chain asset.');
+  }
   const contract = await getAssetContract();
-  const tx = await contract.mintAsset(to, targetDID, name, category, ipfsHash, payloadHash);
+  const tx = await contract.mintAsset(
+    destinationAddress,
+    targetDID,
+    name,
+    category,
+    ipfsHash || '',
+    payloadHash || '0x0000000000000000000000000000000000000000000000000000000000000000',
+  );
   const receipt = await tx.wait();
   return { transactionHash: receipt.hash, blockNumber: receipt.blockNumber };
 }
 
 /** Assign/transfer an asset to a new recipient and DID */
-async function assignAssetOnChain({ tokenId, to, targetDID }) {
+async function assignAssetOnChain({ tokenId, to, recipient, targetDID }) {
   if (!isBlockchainEnabled()) return null;
+  const destinationAddress = to || recipient;
+  if (!destinationAddress) {
+    throw new Error('Recipient address is required for assigning on-chain asset.');
+  }
   const contract = await getAssetContract();
-  const tx = await contract.assignAsset(tokenId, to, targetDID);
+  const tx = await contract.assignAsset(tokenId, destinationAddress, targetDID);
   const receipt = await tx.wait();
   return { transactionHash: receipt.hash, blockNumber: receipt.blockNumber };
 }
