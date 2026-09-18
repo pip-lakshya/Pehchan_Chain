@@ -151,6 +151,10 @@ function AdminDashboard() {
         transactionHash: res.transactionHash,
         blockNumber: res.blockNumber,
       });
+
+      // Auto-refresh inspector for target DID
+      setInspectDID(res.targetDID);
+      getRolesForDID(res.targetDID).then(setInspectedRoles).catch(() => {});
     } catch (err) {
       setRoleError(err.message || "Failed to assign role.");
       setRoleStatus("error");
@@ -178,6 +182,10 @@ function AdminDashboard() {
         transactionHash: res.transactionHash,
         blockNumber: res.blockNumber,
       });
+
+      // Auto-refresh inspector for target DID
+      setInspectDID(res.targetDID);
+      getRolesForDID(res.targetDID).then(setInspectedRoles).catch(() => {});
     } catch (err) {
       setRoleError(err.message || "Failed to revoke role.");
       setRoleStatus("error");
@@ -457,14 +465,30 @@ function AdminDashboard() {
                     <h3>Role Administration (Assign / Revoke)</h3>
                     <span className="blauth-admin-badge blauth-admin-badge-gold">ADMIN ONLY</span>
                   </div>
-                  <button
-                    type="button"
-                    className="blauth-did-copy-btn"
-                    onClick={() => setRoleForm({ targetDID: "did:pehchan:wallet_manager_01", role: "MANAGER" })}
-                    style={{ padding: "6px 12px", fontSize: "11px" }}
-                  >
-                    ⚡ Auto-Fill Demo Manager
-                  </button>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    {walletId && (
+                      <button
+                        type="button"
+                        className="blauth-did-copy-btn"
+                        onClick={() => {
+                          const userDid = walletId.startsWith("did:") ? walletId : `did:pehchan:${walletId}`;
+                          setRoleForm({ targetDID: userDid, role: "ADMIN" });
+                          setInspectDID(userDid);
+                        }}
+                        style={{ padding: "6px 12px", fontSize: "11px" }}
+                      >
+                        ⚡ Auto-Fill My Identity
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="blauth-did-copy-btn"
+                      onClick={() => setRoleForm({ targetDID: "did:pehchan:wallet_manager_01", role: "MANAGER" })}
+                      style={{ padding: "6px 12px", fontSize: "11px" }}
+                    >
+                      ⚡ Auto-Fill Demo Manager
+                    </button>
+                  </div>
                   <p className="blauth-admin-help-text">
                     Grant or revoke smart-contract roles on the <code>PehchanAccessControl</code> hub.
                   </p>
