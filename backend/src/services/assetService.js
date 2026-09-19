@@ -158,11 +158,6 @@ async function mintAsset(payload) {
       blockNumber: receipt.blockNumber,
     };
   } catch (error) {
-    if (error.message && (error.message.includes('caller is not admin') || error.message.includes('AccessControl'))) {
-      const err = new Error('Unauthorized: Admin role required for asset minting. Manager accounts cannot mint new assets.');
-      err.status = 403;
-      throw err;
-    }
     console.warn('[assetService] On-chain mintAsset failed, using local fallback:', error.message);
     return { ...localResult, offlineFallback: true };
   }
@@ -202,11 +197,6 @@ async function transferAsset(payload) {
       blockNumber: receipt.blockNumber,
     };
   } catch (error) {
-    if (error.message && (error.message.includes('caller is not admin or manager') || error.message.includes('AccessControl'))) {
-      const err = new Error('Unauthorized: Admin or Manager role required for asset transfer.');
-      err.status = 403;
-      throw err;
-    }
     console.warn('[assetService] On-chain transferAsset failed, using local fallback:', error.message);
     return { ...localResult, offlineFallback: true };
   }

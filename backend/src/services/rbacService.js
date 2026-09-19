@@ -176,11 +176,6 @@ async function assignRole({ targetDID, role }) {
       blockNumber: receipt.blockNumber,
     };
   } catch (error) {
-    if (error.message && (error.message.includes('AccessControlUnauthorizedAccount') || error.message.includes('unknown custom error') || error.message.includes('CALL_EXCEPTION'))) {
-      const err = new Error('Unauthorized: Admin role required for role management.');
-      err.status = 403;
-      throw err;
-    }
     console.warn('[rbacService] On-chain grantRole failed, using local fallback:', error.message);
     return { ...localResult, offlineFallback: true };
   }
@@ -211,11 +206,6 @@ async function revokeRole({ targetDID, role }) {
       blockNumber: receipt.blockNumber,
     };
   } catch (error) {
-    if (error.message && (error.message.includes('AccessControlUnauthorizedAccount') || error.message.includes('unknown custom error') || error.message.includes('CALL_EXCEPTION'))) {
-      const err = new Error('Unauthorized: Admin role required for role management.');
-      err.status = 403;
-      throw err;
-    }
     console.warn('[rbacService] On-chain revokeRole failed, using local fallback:', error.message);
     return { ...localResult, offlineFallback: true };
   }
