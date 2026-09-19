@@ -26,7 +26,8 @@ class WalletStore {
 
   async findByWalletId(walletId) {
     const wallets = await this.readWallets();
-    return wallets.find((wallet) => wallet.walletId === walletId) || null;
+    const cleanId = walletId ? walletId.replace(/^did:pehchan:/, '') : walletId;
+    return wallets.find((wallet) => wallet.walletId === walletId || wallet.walletId === cleanId) || null;
   }
 
   async findByBiometricCommitment(biometricCommitment) {

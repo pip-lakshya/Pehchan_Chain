@@ -155,8 +155,9 @@ function AdminDashboard() {
       // Auto-refresh inspector for target DID and update active session DID
       setInspectDID(res.targetDID);
       if (res.role === "ADMIN" || res.role === "MANAGER") {
-        localStorage.setItem(WALLET_ID_KEY, res.targetDID);
-        setWalletId(res.targetDID);
+        const cleanWalletId = res.targetDID.replace(/^did:pehchan:/, "");
+        localStorage.setItem(WALLET_ID_KEY, cleanWalletId);
+        setWalletId(cleanWalletId);
       }
       getRolesForDID(res.targetDID).then(setInspectedRoles).catch(() => {});
     } catch (err) {
