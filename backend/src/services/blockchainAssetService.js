@@ -33,15 +33,25 @@ function isBlockchainEnabled() {
   return process.env.BLOCKCHAIN_ENABLED === 'true';
 }
 
+const FALLBACK_RPCS = [
+  'https://rpc-amoy.polygon.technology',
+  'https://polygon-amoy-bor-rpc.publicnode.com',
+  'https://polygon-amoy.drpc.org',
+];
+
 function getAssetConfig() {
   const { BLOCKCHAIN_RPC_URL, BLOCKCHAIN_PRIVATE_KEY, ASSET_REGISTRY_ADDR, ACCESS_CONTROL_ADDR } = process.env;
 
-  if (!BLOCKCHAIN_RPC_URL || !BLOCKCHAIN_PRIVATE_KEY) {
-    throw new Error('Blockchain RPC or private key configuration is incomplete.');
+  if (!BLOCKCHAIN_PRIVATE_KEY) {
+    throw new Error('Blockchain private key configuration is incomplete.');
   }
 
+  const rpcList = BLOCKCHAIN_RPC_URL
+    ? [BLOCKCHAIN_RPC_URL, ...FALLBACK_RPCS.filter((r) => r !== BLOCKCHAIN_RPC_URL)]
+    : FALLBACK_RPCS;
+
   return {
-    rpcUrl: BLOCKCHAIN_RPC_URL,
+    rpcList,
     privateKey: BLOCKCHAIN_PRIVATE_KEY,
     assetRegistryAddr: ASSET_REGISTRY_ADDR || null,
     accessControlAddr: ACCESS_CONTROL_ADDR || null,
@@ -50,17 +60,25 @@ function getAssetConfig() {
 
 async function getProviderAndSigner() {
   const { JsonRpcProvider, Wallet } = await import('ethers');
-  const { rpcUrl, privateKey } = getAssetConfig();
+  const { rpcList, privateKey } = getAssetConfig();
 
-  const provider = new JsonRpcProvider(rpcUrl, { chainId: POLYGON_AMOY_CHAIN_ID, name: 'polygon-amoy' });
-  const network = await provider.getNetwork();
+  let lastError = null;
 
-  if (Number(network.chainId) !== POLYGON_AMOY_CHAIN_ID) {
-    throw new Error('Configured RPC endpoint is not Polygon Amoy.');
+  for (const rpcUrl of rpcList) {
+    try {
+      const provider = new JsonRpcProvider(rpcUrl, { chainId: POLYGON_AMOY_CHAIN_ID, name: 'polygon-amoy' });
+      const network = await provider.getNetwork();
+
+      if (Number(network.chainId) === POLYGON_AMOY_CHAIN_ID) {
+        const signer = new Wallet(privateKey, provider);
+        return { provider, signer };
+      }
+    } catch (err) {
+      lastError = err;
+    }
   }
 
-  const signer = new Wallet(privateKey, provider);
-  return { provider, signer };
+  throw lastError || new Error('All Polygon Amoy RPC endpoints failed.');
 }
 
 async function getAssetContract() {
