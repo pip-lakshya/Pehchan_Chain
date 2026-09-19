@@ -131,13 +131,14 @@ const { getRolesForDID } = require('./rbacService');
 async function mintAsset(payload) {
   if (payload.requesterDID) {
     const userRoles = await getRolesForDID(payload.requesterDID);
-    if (!userRoles.isAdmin) {
-      const targetRoles = payload.targetDID ? await getRolesForDID(payload.targetDID) : null;
-      if (!targetRoles || !targetRoles.isAdmin) {
-        const err = new Error('Unauthorized: Admin role required for asset minting. Manager accounts cannot mint new assets.');
-        err.status = 403;
-        throw err;
-      }
+    const targetRoles = payload.targetDID ? await getRolesForDID(payload.targetDID) : null;
+
+    const hasAdminRole = userRoles.isAdmin || (targetRoles && targetRoles.isAdmin);
+
+    if (!hasAdminRole) {
+      const err = new Error('Unauthorized: Admin role required for asset minting. Manager accounts cannot mint new assets.');
+      err.status = 403;
+      throw err;
     }
   }
 
@@ -171,13 +172,17 @@ async function mintAsset(payload) {
 async function transferAsset(payload) {
   if (payload.requesterDID) {
     const userRoles = await getRolesForDID(payload.requesterDID);
-    if (!userRoles.isAdmin && !userRoles.isManager) {
-      const targetRoles = payload.targetDID ? await getRolesForDID(payload.targetDID) : null;
-      if (!targetRoles || (!targetRoles.isAdmin && !targetRoles.isManager)) {
-        const err = new Error('Unauthorized: Admin or Manager role required for asset transfer.');
-        err.status = 403;
-        throw err;
-      }
+    const targetRoles = payload.targetDID ? await getRolesForDID(payload.targetDID) : null;
+
+    const hasTransferRole =
+      userRoles.isAdmin ||
+      userRoles.isManager ||
+      (targetRoles && (targetRoles.isAdmin || targetRoles.isManager));
+
+    if (!hasTransferRole) {
+      const err = new Error('Unauthorized: Admin or Manager role required for asset transfer.');
+      err.status = 403;
+      throw err;
     }
   }
 

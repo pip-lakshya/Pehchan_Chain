@@ -12,7 +12,7 @@ const WALLET_ID_KEY = "blauthWalletId";
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const [walletId] = useState(() => localStorage.getItem(WALLET_ID_KEY));
+  const [walletId, setWalletId] = useState(() => localStorage.getItem(WALLET_ID_KEY));
   const adminDID = walletId ? (walletId.startsWith("did:") ? walletId : `did:pehchan:${walletId}`) : "did:pehchan:admin_workspace";
 
   const [activeTab, setActiveTab] = useState("assets"); // "assets" | "roles" | "audit"
@@ -152,8 +152,12 @@ function AdminDashboard() {
         blockNumber: res.blockNumber,
       });
 
-      // Auto-refresh inspector for target DID
+      // Auto-refresh inspector for target DID and update active session DID
       setInspectDID(res.targetDID);
+      if (res.role === "ADMIN" || res.role === "MANAGER") {
+        localStorage.setItem(WALLET_ID_KEY, res.targetDID);
+        setWalletId(res.targetDID);
+      }
       getRolesForDID(res.targetDID).then(setInspectedRoles).catch(() => {});
     } catch (err) {
       setRoleError(err.message || "Failed to assign role.");
