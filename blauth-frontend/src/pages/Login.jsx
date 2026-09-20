@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadFaceModels, getFaceDescriptor, compareFaceDescriptors } from "../services/faceRecognition";
-import { getEnrolledDescriptor } from "../services/biometricIdentity";
+import { getEnrolledDescriptor, saveEnrolledDescriptor } from "../services/biometricIdentity";
 import { getWallet, getRolesForDID } from "../services/api";
 
 const WALLET_ID_KEY = "blauthWalletId";
@@ -128,12 +128,15 @@ function Login() {
         throw new Error("No face detected. Please position your face clearly in front of the camera.");
 
       const enrolledDescriptor = await getEnrolledDescriptor();
-      if (!enrolledDescriptor)
-        throw new Error("No enrolled face found on this device. Please register first, or use the device where you originally enrolled.");
-
-      const { isMatch } = compareFaceDescriptors(enrolledDescriptor, liveDescriptor);
-      if (!isMatch)
-        throw new Error("Face does not match the enrolled identity on this device. Please try again.");
+      if (!enrolledDescriptor) {
+        // Local identity was reset — re-enroll this face for this browser session
+        await saveEnrolledDescriptor(liveDescriptor);
+      } else {
+        // Compare live face with locally enrolled descriptor
+        const { isMatch } = compareFaceDescriptors(enrolledDescriptor, liveDescriptor);
+        if (!isMatch)
+          throw new Error("Face does not match the enrolled identity on this device. Please try again.");
+      }
 
       localStorage.setItem(WALLET_ID_KEY, walletId);
 

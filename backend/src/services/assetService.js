@@ -30,10 +30,56 @@ class MockAssetStore {
     this.loadFromDisk();
   }
 
+  seedDefaults() {
+    const defaultAssets = [
+      {
+        tokenId: "1",
+        ownerAddress: "0xebacaEc8C8bC1E7e2D37355788DdB22C1EB209FD",
+        targetDID: "did:pehchan:wallet_384afd2d-70a9-41c4-8b5c-0d2c837a3280",
+        name: "Defence Project Clearance ID",
+        category: "SECURITY_CLEARANCE",
+        ipfsHash: "ipfs://QmPehchanClearance001",
+        payloadHash: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        mintedAt: "1789884470",
+        updatedAt: "1789884470",
+      },
+      {
+        tokenId: "2",
+        ownerAddress: "0xebacaEc8C8bC1E7e2D37355788DdB22C1EB209FD",
+        targetDID: "did:pehchan:wallet_384afd2d-70a9-41c4-8b5c-0d2c837a3280",
+        name: "BEL Defence Engineer Credential",
+        category: "ENGINEERING_LICENSE",
+        ipfsHash: "ipfs://QmPehchanEngineer002",
+        payloadHash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+        mintedAt: "1789884470",
+        updatedAt: "1789884470",
+      },
+    ];
+
+    let maxId = 0n;
+    for (const asset of defaultAssets) {
+      if (!this.assets.has(asset.tokenId)) {
+        this.assets.set(asset.tokenId, asset);
+        if (!this.didToTokens.has(asset.targetDID)) {
+          this.didToTokens.set(asset.targetDID, new Set());
+        }
+        this.didToTokens.get(asset.targetDID).add(asset.tokenId);
+      }
+    }
+
+    for (const idStr of this.assets.keys()) {
+      try {
+        const currentBig = BigInt(idStr);
+        if (currentBig > maxId) maxId = currentBig;
+      } catch {}
+    }
+    this.nextTokenId = maxId + 1n;
+  }
+
   loadFromDisk() {
     try {
       if (fs.existsSync(ASSETS_FILE_PATH)) {
-        const raw = fs.readFileSync(ASSETS_FILE_PATH, 'utf8');
+        const raw = fs.readFileSync(ASSETS_FILE_PATH, "utf8");
         const list = JSON.parse(raw);
         if (Array.isArray(list)) {
           let maxId = 0n;
@@ -60,8 +106,9 @@ class MockAssetStore {
         }
       }
     } catch (err) {
-      console.warn('[MockAssetStore] Error loading assets from disk:', err.message);
+      console.warn("[MockAssetStore] Error loading assets from disk:", err.message);
     }
+    this.seedDefaults();
   }
 
   saveToDisk() {
@@ -175,7 +222,7 @@ class MockAssetStore {
   reset() {
     this.assets.clear();
     this.didToTokens.clear();
-    this.nextTokenId = 1n;
+    this.seedDefaults();
     this.saveToDisk();
   }
 }
@@ -279,8 +326,7 @@ async function getAssetOwner(tokenId) {
     try {
       return mockStore.getOwner(tokenId);
     } catch {
-      if (error.status === 404) throw error;
-      const err = new Error(`Asset not found: ${error.message}`);
+      const err = new Error(`Asset not found: Token ID #${tokenId} does not exist on-chain or in local store.`);
       err.status = 404;
       throw err;
     }
