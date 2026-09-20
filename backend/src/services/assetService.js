@@ -17,12 +17,64 @@ const {
   getAssetsByDIDOnChain,
 } = require('./blockchainAssetService');
 
-// In-memory mock store for offline testing
+const fs = require('fs');
+const path = require('path');
+const ASSETS_FILE_PATH = path.resolve(__dirname, '../../data/assets.json');
+
+// Persistent mock store for offline/fallback testing
 class MockAssetStore {
   constructor() {
     this.assets = new Map(); // tokenId string => asset object
     this.didToTokens = new Map(); // targetDID => Set of tokenId strings
     this.nextTokenId = 1n;
+    this.loadFromDisk();
+  }
+
+  loadFromDisk() {
+    try {
+      if (fs.existsSync(ASSETS_FILE_PATH)) {
+        const raw = fs.readFileSync(ASSETS_FILE_PATH, 'utf8');
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) {
+          let maxId = 0n;
+          for (const asset of list) {
+            const idStr = String(asset.tokenId || asset.id);
+            this.assets.set(idStr, asset);
+
+            const targetDID = asset.targetDID;
+            if (targetDID) {
+              if (!this.didToTokens.has(targetDID)) {
+                this.didToTokens.set(targetDID, new Set());
+              }
+              this.didToTokens.get(targetDID).add(idStr);
+            }
+
+            try {
+              const currentBig = BigInt(idStr);
+              if (currentBig > maxId) maxId = currentBig;
+            } catch {
+              // skip non-numeric ids
+            }
+          }
+          this.nextTokenId = maxId + 1n;
+        }
+      }
+    } catch (err) {
+      console.warn('[MockAssetStore] Error loading assets from disk:', err.message);
+    }
+  }
+
+  saveToDisk() {
+    try {
+      const dir = path.dirname(ASSETS_FILE_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      const list = Array.from(this.assets.values());
+      fs.writeFileSync(ASSETS_FILE_PATH, JSON.stringify(list, null, 2), 'utf8');
+    } catch (err) {
+      console.warn('[MockAssetStore] Error saving assets to disk:', err.message);
+    }
   }
 
   mint({ recipient, targetDID, name, category, ipfsHash, payloadHash }) {
@@ -47,6 +99,8 @@ class MockAssetStore {
       this.didToTokens.set(targetDID, new Set());
     }
     this.didToTokens.get(targetDID).add(tokenId);
+
+    this.saveToDisk();
 
     return {
       tokenId,
@@ -81,6 +135,8 @@ class MockAssetStore {
       this.didToTokens.set(targetDID, new Set());
     }
     this.didToTokens.get(targetDID).add(id);
+
+    this.saveToDisk();
 
     return {
       tokenId: id,
@@ -120,6 +176,7 @@ class MockAssetStore {
     this.assets.clear();
     this.didToTokens.clear();
     this.nextTokenId = 1n;
+    this.saveToDisk();
   }
 }
 
