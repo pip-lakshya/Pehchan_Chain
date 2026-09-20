@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   mintAsset,
@@ -15,12 +15,27 @@ function AdminDashboard() {
   const [walletId, setWalletId] = useState(() => localStorage.getItem(WALLET_ID_KEY));
   const adminDID = walletId ? (walletId.startsWith("did:") ? walletId : `did:pehchan:${walletId}`) : "did:pehchan:admin_workspace";
 
+  // ── ADMIN role guard ────────────────────────────────────────────────────────
+  const sessionDID = walletId
+    ? walletId.startsWith("did:") ? walletId : `did:pehchan:${walletId}`
+    : null;
+  const [roleCheckState, setRoleCheckState] = useState("checking"); // "checking" | "authorized" | "unauthorized"
+
+  useEffect(() => {
+    if (!sessionDID) { setRoleCheckState("unauthorized"); return; }
+    getRolesForDID(sessionDID)
+      .then((info) => setRoleCheckState(info?.isAdmin ? "authorized" : "unauthorized"))
+      .catch(() => setRoleCheckState("unauthorized"));
+  }, [sessionDID]);
+
   const [activeTab, setActiveTab] = useState("assets"); // "assets" | "roles" | "audit"
 
-  // Mint Form State
+  // Mint Form State — targetDID defaults to the logged-in session DID
   const [mintForm, setMintForm] = useState({
     recipient: "0x1111111111111111111111111111111111111111",
-    targetDID: "did:pehchan:student_001",
+    targetDID: walletId
+      ? walletId.startsWith("did:") ? walletId : `did:pehchan:${walletId}`
+      : "did:pehchan:admin_workspace",
     name: "Defence Project Clearance ID",
     category: "SECURITY_CLEARANCE",
     ipfsHash: "ipfs://QmPehchanClearance001",
@@ -30,11 +45,13 @@ function AdminDashboard() {
   const [mintResult, setMintResult] = useState(null);
   const [mintError, setMintError] = useState("");
 
-  // Assign/Transfer Form State
+  // Assign/Transfer Form State — targetDID defaults to the logged-in session DID
   const [assignForm, setAssignForm] = useState({
     tokenId: "1",
-    recipient: "0x2222222222222222222222222222222222222222",
-    targetDID: "did:pehchan:student_002",
+    recipient: "0x1111111111111111111111111111111111111111",
+    targetDID: walletId
+      ? walletId.startsWith("did:") ? walletId : `did:pehchan:${walletId}`
+      : "did:pehchan:admin_workspace",
   });
   const [assignStatus, setAssignStatus] = useState("idle");
   const [assignResult, setAssignResult] = useState(null);
@@ -211,11 +228,61 @@ function AdminDashboard() {
     }
   }
 
+  // ─── Admin role guard early renders ──────────────────────────────────────────
+  if (roleCheckState === "checking") {
+    return (
+      <main className="blauth-consent">
+        <nav className="blauth-register-nav" aria-label="Admin navigation">
+          <span className="blauth-nav-status"><i /> Admin &amp; Governance Console</span>
+        </nav>
+        <section className="blauth-consent-shell">
+          <div className="blauth-consent-card" style={{ textAlign: "center", padding: "48px 24px" }}>
+            <p className="blauth-enrollment-message" role="status">Verifying access permissions…</p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (roleCheckState === "unauthorized") {
+    return (
+      <main className="blauth-consent">
+        <nav className="blauth-register-nav" aria-label="Admin navigation">
+          <span className="blauth-nav-status"><i /> Admin &amp; Governance Console</span>
+        </nav>
+        <section className="blauth-consent-shell">
+          <article className="blauth-consent-card" style={{ textAlign: "center", padding: "48px 24px" }}>
+            <div className="blauth-result-mark" style={{ color: "var(--blauth-error, #c0392b)" }}>🔒</div>
+            <h2 style={{ marginTop: "16px" }}>Unauthorized Access</h2>
+            <p style={{ marginTop: "8px", color: "var(--blauth-muted, #666)" }}>
+              <strong>Unauthorized: Admin role required to access the Admin Console.</strong>
+            </p>
+            <p style={{ marginTop: "12px", fontSize: "14px", color: "var(--blauth-muted, #666)" }}>
+              Your active DID{" "}
+              {sessionDID ? (
+                <code className="blauth-manager-code">{sessionDID}</code>
+              ) : (
+                "(not signed in)"
+              )}{" "}
+              does not have the <strong>ADMIN</strong> role assigned.
+              Contact a system administrator to get <code className="blauth-manager-code">ADMIN</code> access.
+            </p>
+            <div style={{ marginTop: "24px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+              <button type="button" className="blauth-back-button" onClick={() => navigate("/wallet")}>
+                ← Return to Wallet
+              </button>
+            </div>
+          </article>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="blauth-consent">
       <nav className="blauth-register-nav" aria-label="Admin navigation">
         <span className="blauth-nav-status">
-          <i /> Admin & Governance Console
+          <i /> Admin &amp; Governance Console
         </span>
       </nav>
 

@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { transferAsset, getAssetOwner } from "../services/api";
+import { transferAsset, getAssetOwner, getRolesForDID } from "../services/api";
 
 const WALLET_ID_KEY = "blauthWalletId";
 
@@ -32,6 +32,20 @@ function TxStatusPill({ status }) {
 // ─── Manager Panel ────────────────────────────────────────────────────────────
 function ManagerPanel() {
   const navigate = useNavigate();
+
+  // ── MANAGER role guard ──────────────────────────────────────────────────────
+  const sessionWalletId = localStorage.getItem(WALLET_ID_KEY);
+  const sessionDID = sessionWalletId
+    ? sessionWalletId.startsWith("did:") ? sessionWalletId : `did:pehchan:${sessionWalletId}`
+    : null;
+  const [roleCheckState, setRoleCheckState] = useState("checking"); // "checking" | "authorized" | "unauthorized"
+
+  useEffect(() => {
+    if (!sessionDID) { setRoleCheckState("unauthorized"); return; }
+    getRolesForDID(sessionDID)
+      .then((info) => setRoleCheckState(info?.isManager || info?.isAdmin ? "authorized" : "unauthorized"))
+      .catch(() => setRoleCheckState("unauthorized"));
+  }, [sessionDID]);
 
   // Derive requester DID from the stored wallet session.
   const [walletId] = useState(() => localStorage.getItem(WALLET_ID_KEY));
@@ -134,6 +148,59 @@ function ManagerPanel() {
     },
     [lookupTokenId],
   );
+
+  // ─── Manager role guard early renders ────────────────────────────────────────
+  if (roleCheckState === "checking") {
+    return (
+      <main className="blauth-consent">
+        <nav className="blauth-register-nav" aria-label="Manager navigation">
+          <span className="blauth-nav-status"><i /> Manager Panel</span>
+        </nav>
+        <section className="blauth-consent-shell">
+          <div className="blauth-consent-card" style={{ textAlign: "center", padding: "48px 24px" }}>
+            <p className="blauth-enrollment-message" role="status">Verifying access permissions…</p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (roleCheckState === "unauthorized") {
+    return (
+      <main className="blauth-consent">
+        <nav className="blauth-register-nav" aria-label="Manager navigation">
+          <span className="blauth-nav-status"><i /> Manager Panel</span>
+        </nav>
+        <section className="blauth-consent-shell">
+          <article className="blauth-consent-card" style={{ textAlign: "center", padding: "48px 24px" }}>
+            <div className="blauth-result-mark" style={{ color: "var(--blauth-error, #c0392b)" }}>🔒</div>
+            <h2 style={{ marginTop: "16px" }}>Unauthorized Access</h2>
+            <p style={{ marginTop: "8px", color: "var(--blauth-muted, #666)" }}>
+              <strong>Unauthorized: Manager role required to access the Manager Panel.</strong>
+            </p>
+            <p style={{ marginTop: "12px", fontSize: "14px", color: "var(--blauth-muted, #666)" }}>
+              Your active DID{" "}
+              {sessionDID ? (
+                <code className="blauth-manager-code">{sessionDID}</code>
+              ) : (
+                "(not signed in)"
+              )}{" "}
+              does not have the <strong>MANAGER</strong> (or <strong>ADMIN</strong>) role assigned.
+              Ask an Administrator to grant you the <code className="blauth-manager-code">MANAGER</code> role via the Admin Dashboard.
+            </p>
+            <div style={{ marginTop: "24px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+              <button type="button" className="blauth-back-button" onClick={() => navigate("/wallet")}>
+                ← Return to Wallet
+              </button>
+              <button type="button" className="blauth-continue-button" onClick={() => navigate("/admin")}>
+                Go to Admin Dashboard →
+              </button>
+            </div>
+          </article>
+        </section>
+      </main>
+    );
+  }
 
   // ─────────────────────────────────────────────────────────────────────────
   return (

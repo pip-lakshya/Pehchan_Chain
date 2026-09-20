@@ -58,6 +58,7 @@ function Home() {
           <p className="blauth-hero-copy">Verify locally. Share selectively. Anchor on Polygon Amoy.</p>
           <div className="blauth-actions">
             <Link className="blauth-button blauth-button-primary" to="/register">Create Identity <span>→</span></Link>
+            <Link className="blauth-button blauth-button-primary" to="/login">Login with Biometrics <span>→</span></Link>
             <Link className="blauth-button blauth-button-secondary" to="/wallet">Open Wallet</Link>
             <Link className="blauth-button blauth-button-secondary" to="/developer">Developer Console</Link>
           </div>

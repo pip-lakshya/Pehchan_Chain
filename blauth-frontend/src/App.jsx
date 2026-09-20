@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import "./App.css";
 import Register from "./pages/Register";
+import Login from "./pages/Login";
 import FaceVerify from "./pages/FaceVerify";
 import Wallet from "./pages/Wallet";
 import DisclosureHistory from "./pages/DisclosureHistory";
@@ -22,6 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/verify" element={<FaceVerify />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/consent" element={<Consent />} />

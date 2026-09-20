@@ -168,25 +168,39 @@ function Consent() {
     setBiometricError("");
 
     try {
+      // Camera must be ready to proceed — do not allow bypass
+      if (!cameraReady || !videoRef.current) {
+        throw new Error(
+          "Camera is required for biometric confirmation. Please allow camera access and try again."
+        );
+      }
+
+      if (!modelsReady) {
+        throw new Error(
+          "Biometric models are still loading. Please wait a moment and try again."
+        );
+      }
+
+      // Perform real-time face detection — must detect a face to proceed
+      const currentDescriptor = await getFaceDescriptor(videoRef.current);
+      if (!currentDescriptor) {
+        throw new Error(
+          "No face detected in camera feed. Please position your face clearly in front of the camera and try again."
+        );
+      }
+
       let referenceDescriptor = await getEnrolledDescriptor();
       if (!referenceDescriptor) {
         // Fallback demo descriptor if enrolled descriptor is missing
         referenceDescriptor = new Array(128).fill(0.1);
       }
 
-      // If camera is ready and video element available, perform real-time match
-      if (cameraReady && videoRef.current && modelsReady) {
-        try {
-          const currentDescriptor = await getFaceDescriptor(videoRef.current);
-          if (currentDescriptor) {
-            const matchResult = compareFaceDescriptors(referenceDescriptor, currentDescriptor);
-            if (!matchResult.isMatch) {
-              console.warn("Local face match low confidence, using biometric commitment signature.");
-            }
-          }
-        } catch (e) {
-          console.warn("Face descriptor check skipped:", e.message);
-        }
+      // If enrolled descriptor is available, verify the face matches
+      const matchResult = compareFaceDescriptors(referenceDescriptor, currentDescriptor);
+      if (!matchResult.isMatch) {
+        throw new Error(
+          "Biometric face match failed. Captured face does not match your enrolled identity."
+        );
       }
 
       try {

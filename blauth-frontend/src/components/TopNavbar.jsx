@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 const links = [
   { to: "/", label: "Home" },
   { to: "/register", label: "Create Identity" },
+  { to: "/login", label: "Login" },
   { to: "/wallet", label: "Wallet" },
   { to: "/admin", label: "Admin Console" },
   { to: "/manager", label: "Manager Panel" },

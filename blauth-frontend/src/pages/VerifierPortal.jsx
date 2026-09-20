@@ -25,7 +25,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { createVerificationRequest, getVerificationRequestStatus } from "../services/api";
+import { createVerificationRequest, getVerificationRequestStatus, getRolesForDID } from "../services/api";
 import { identityFieldLabels } from "../mockData";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -112,6 +112,25 @@ function Steps({ current }) {
 
 function VerifierPortal() {
   const navigate = useNavigate();
+
+  // ── Auditor role guard ──────────────────────────────────────────────────────
+  const sessionWalletId = localStorage.getItem("blauthWalletId");
+  const sessionDID = sessionWalletId
+    ? sessionWalletId.startsWith("did:") ? sessionWalletId : `did:pehchan:${sessionWalletId}`
+    : null;
+  const [auditorCheckState, setAuditorCheckState] = useState("checking"); // "checking" | "authorized" | "unauthorized"
+
+  useEffect(() => {
+    if (!sessionDID) {
+      setAuditorCheckState("unauthorized");
+      return;
+    }
+    getRolesForDID(sessionDID)
+      .then((roleInfo) => {
+        setAuditorCheckState(roleInfo?.isAuditor || roleInfo?.isAdmin ? "authorized" : "unauthorized");
+      })
+      .catch(() => setAuditorCheckState("unauthorized"));
+  }, [sessionDID]);
 
   // ── Step 1: Verifier identity ───────────────────────────────────────────────
   const [verifierId, setVerifierId]   = useState("");
@@ -266,6 +285,67 @@ function VerifierPortal() {
     setPollAttempts(0);
     setStep2Error("");
     setStep3Error("");
+  }
+
+  // ─── Auditor role guard early renders ────────────────────────────────────────
+  if (auditorCheckState === "checking") {
+    return (
+      <main className="blauth-consent">
+        <nav className="blauth-register-nav" aria-label="Verifier navigation">
+          <span className="blauth-nav-status"><i /> Authenticator Mode 1 — Verifier Portal</span>
+        </nav>
+        <section className="blauth-consent-shell">
+          <div className="blauth-consent-card" style={{ textAlign: "center", padding: "48px 24px" }}>
+            <p className="blauth-enrollment-message" role="status">Verifying access permissions…</p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (auditorCheckState === "unauthorized") {
+    return (
+      <main className="blauth-consent">
+        <nav className="blauth-register-nav" aria-label="Verifier navigation">
+          <span className="blauth-nav-status"><i /> Authenticator Mode 1 — Verifier Portal</span>
+        </nav>
+        <section className="blauth-consent-shell">
+          <article className="blauth-consent-card" style={{ textAlign: "center", padding: "48px 24px" }}>
+            <div className="blauth-result-mark" style={{ color: "var(--blauth-error, #c0392b)" }}>🔒</div>
+            <h2 style={{ marginTop: "16px" }}>Unauthorized Access</h2>
+            <p style={{ marginTop: "8px", color: "var(--blauth-muted, #666)" }}>
+              <strong>Unauthorized: Auditor role required to access the Verifier Portal.</strong>
+            </p>
+            <p style={{ marginTop: "12px", fontSize: "14px", color: "var(--blauth-muted, #666)" }}>
+              Your active DID{" "}
+              {sessionDID ? (
+                <code className="blauth-manager-code">{sessionDID}</code>
+              ) : (
+                "(not signed in)"
+              )}{" "}
+              does not have the <strong>AUDITOR</strong> role assigned.
+              Ask an Administrator to grant you the <code className="blauth-manager-code">AUDITOR</code> role via the Admin Dashboard.
+            </p>
+            <div style={{ marginTop: "24px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className="blauth-back-button"
+                onClick={() => navigate("/wallet")}
+              >
+                ← Return to Wallet
+              </button>
+              <button
+                type="button"
+                className="blauth-continue-button"
+                onClick={() => navigate("/admin")}
+              >
+                Go to Admin Dashboard →
+              </button>
+            </div>
+          </article>
+        </section>
+      </main>
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
