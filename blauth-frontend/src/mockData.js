@@ -28,4 +28,6 @@ export const identityFieldLabels = {
   dob: "Date of Birth",
   phone: "Phone",
   ageOver18: "Age Over 18",
+  assets: "Digital Assets & NFTs",
+  nft: "NFT & Certificates",
 };

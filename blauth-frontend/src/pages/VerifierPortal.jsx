@@ -38,6 +38,7 @@ const SUPPORTED_FIELDS = [
   { key: "phone",      label: "Phone Number" },
   { key: "dob",        label: "Date of Birth" },
   { key: "ageOver18",  label: "Age Over 18 (derived — DOB not disclosed)" },
+  { key: "assets",     label: "Assigned Digital Assets & NFTs" },
 ];
 
 const POLL_INTERVAL_MS = 3000;
@@ -61,6 +62,20 @@ function FieldValue({ fieldKey, value }) {
       <span className={`blauth-verifier-bool-pill ${value ? "is-true" : "is-false"}`}>
         {value ? "Yes — over 18" : "No — under 18"}
       </span>
+    );
+  }
+  if (fieldKey === "assets" || fieldKey === "nft") {
+    if (!Array.isArray(value) || value.length === 0) {
+      return <span>No digital assets / NFTs assigned</span>;
+    }
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        {value.map((asset) => (
+          <span key={asset.tokenId || asset.id} className="blauth-asset-token-chip" style={{ fontSize: "12px", display: "inline-block" }}>
+            Token #{asset.tokenId || asset.id}: {asset.name} ({asset.category || "NFT"})
+          </span>
+        ))}
+      </div>
     );
   }
   return <strong className="blauth-verifier-field-value">{String(value)}</strong>;

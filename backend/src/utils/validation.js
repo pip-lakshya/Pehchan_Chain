@@ -8,7 +8,7 @@ class ValidationError extends Error {
 
 const allowedRequestFields = new Set(['verified', 'credentials', 'biometricCommitment']);
 const allowedCredentialFields = new Set(['name', 'studentId', 'email', 'phone', 'dob']);
-const supportedVerificationFields = new Set(['name', 'studentId', 'email', 'phone', 'dob', 'ageOver18']);
+const supportedVerificationFields = new Set(['name', 'studentId', 'email', 'phone', 'dob', 'ageOver18', 'assets', 'nft']);
 
 function hasOwn(object, property) {
   return Object.prototype.hasOwnProperty.call(object, property);

@@ -109,10 +109,17 @@ async function processConsent(payload) {
   });
 
   const data = {};
+  const { getAssetsByIdentity } = require('./assetService');
   for (const field of disclosedFields) {
-    data[field] = field === 'ageOver18'
-      ? isAgeOver18(wallet.credentials.dob)
-      : wallet.credentials[field];
+    if (field === 'ageOver18') {
+      data[field] = isAgeOver18(wallet.credentials.dob);
+    } else if (field === 'assets' || field === 'nft') {
+      const userDID = wallet.walletId.startsWith('did:') ? wallet.walletId : `did:pehchan:${wallet.walletId}`;
+      const assetData = await getAssetsByIdentity(userDID);
+      data[field] = assetData?.assets || [];
+    } else {
+      data[field] = wallet.credentials[field];
+    }
   }
 
   wallet.disclosureHistory.push(disclosureHistoryEntry);
@@ -177,10 +184,17 @@ async function fetchRequestStatus(requestId) {
         // Build disclosed data from approved fields only (never full credentials)
         const disclosedData = {};
         const { isAgeOver18 } = require('../utils/age');
+        const { getAssetsByIdentity } = require('./assetService');
         for (const field of historyEntry.disclosedFields || []) {
-          disclosedData[field] = field === 'ageOver18'
-            ? isAgeOver18(wallet.credentials.dob)
-            : wallet.credentials[field];
+          if (field === 'ageOver18') {
+            disclosedData[field] = isAgeOver18(wallet.credentials.dob);
+          } else if (field === 'assets' || field === 'nft') {
+            const userDID = wallet.walletId.startsWith('did:') ? wallet.walletId : `did:pehchan:${wallet.walletId}`;
+            const assetData = await getAssetsByIdentity(userDID);
+            disclosedData[field] = assetData?.assets || [];
+          } else {
+            disclosedData[field] = wallet.credentials[field];
+          }
         }
         publicFields.disclosedFields  = historyEntry.disclosedFields  || [];
         publicFields.withheldFields   = historyEntry.withheldFields   || [];
