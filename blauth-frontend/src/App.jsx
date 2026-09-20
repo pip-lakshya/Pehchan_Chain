@@ -11,6 +11,7 @@ import ManagerPanel from "./pages/ManagerPanel";
 import VerifierPortal from "./pages/VerifierPortal";
 import AuditTrail from "./pages/AuditTrail";
 import AuthOverlay from "./pages/AuthOverlay";
+import Consent from "./pages/Consent";
 import TopNavbar from "./components/TopNavbar";
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/verify" element={<FaceVerify />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="/consent" element={<Consent />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/manager" element={<ManagerPanel />} />
           <Route path="/verifier" element={<VerifierPortal />} />

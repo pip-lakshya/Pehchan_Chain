@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getWallet, getAssetsByIdentity } from "../services/api";
+import { getWallet, getAssetsByIdentity, getVerificationRequestsForWallet } from "../services/api";
 import { clearEnrolledDescriptor } from "../services/biometricIdentity";
 
 const WALLET_ID_KEY = "blauthWalletId";
@@ -31,6 +31,8 @@ function Wallet() {
   const [assetsLoading, setAssetsLoading] = useState(true);
   const [copiedDid, setCopiedDid] = useState(false);
 
+  const [requests, setRequests] = useState([]);
+
   const userDID = walletId ? (walletId.startsWith("did:") ? walletId : `did:pehchan:${walletId}`) : "";
 
   useEffect(() => {
@@ -48,6 +50,13 @@ function Wallet() {
         setWalletError(error.message || "The backend wallet could not be loaded.");
         setWalletState("error");
       });
+
+    getVerificationRequestsForWallet(walletId)
+      .then((data) => {
+        if (!isCurrent) return;
+        setRequests(data || []);
+      })
+      .catch(() => {});
 
     return () => { isCurrent = false; };
   }, [walletId]);
@@ -109,6 +118,8 @@ function Wallet() {
     { label: "Phone", value: showPhone ? identity.phone : maskPhone(identity.phone || ""), toggle: () => setShowPhone((value) => !value), shown: showPhone },
   ];
 
+  const pendingRequests = requests.filter((r) => r.status === "PENDING");
+
   return (
     <main className="blauth-wallet">
       <div className="blauth-register-orb blauth-wallet-orb-one" /><div className="blauth-register-orb blauth-wallet-orb-two" />
@@ -155,6 +166,54 @@ function Wallet() {
               </div>
             ))}
           </div>
+
+          {/* Incoming Verification Requests */}
+          {pendingRequests.length > 0 && (
+            <section className="blauth-assets-section" style={{ borderTop: "1px solid rgba(226, 232, 240, 0.8)", paddingTop: "20px" }}>
+              <header className="blauth-assets-header">
+                <h3>Pending Identity Verification Requests</h3>
+                <span className="blauth-assets-badge" style={{ backgroundColor: "#fef3c7", color: "#92400e" }}>
+                  {pendingRequests.length} Pending
+                </span>
+              </header>
+              <div className="blauth-assets-grid">
+                {pendingRequests.map((req) => (
+                  <article className="blauth-asset-item" key={req.requestId} style={{ borderColor: "#fde68a" }}>
+                    <header className="blauth-asset-item-header">
+                      <div>
+                        <span className="blauth-asset-category-pill" style={{ backgroundColor: "#fef3c7", color: "#92400e" }}>
+                          VERIFICATION REQUEST
+                        </span>
+                        <h4>From: {req.verifierId}</h4>
+                      </div>
+                      <span className="blauth-asset-token-chip" style={{ fontSize: "11px" }}>
+                        {req.requestId.slice(0, 16)}…
+                      </span>
+                    </header>
+                    <div className="blauth-asset-item-details">
+                      <div className="blauth-asset-meta-row">
+                        <span>Requested Fields:</span>
+                        <code>{(req.requestedFields || []).join(", ")}</code>
+                      </div>
+                      <div className="blauth-asset-meta-row">
+                        <span>Status:</span>
+                        <strong style={{ color: "#d97706" }}>Awaiting your consent</strong>
+                      </div>
+                      <div style={{ marginTop: "12px" }}>
+                        <Link
+                          to={`/consent?requestId=${encodeURIComponent(req.requestId)}&verifier=${encodeURIComponent(req.verifierId)}`}
+                          className="blauth-button blauth-button-primary"
+                          style={{ display: "inline-block", padding: "8px 16px", fontSize: "13px", textDecoration: "none" }}
+                        >
+                          Review &amp; Share →
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* PehchanChain Digital Assets / NFT Section */}
           <section className="blauth-assets-section">

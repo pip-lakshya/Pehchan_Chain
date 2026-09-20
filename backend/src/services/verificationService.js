@@ -198,4 +198,14 @@ async function fetchRequestStatus(requestId) {
   return publicFields;
 }
 
-module.exports = { createVerificationRequest, processConsent, fetchRequestStatus };
+async function getRequestsForWallet(rawWalletId) {
+  if (!rawWalletId || typeof rawWalletId !== 'string') return [];
+  const walletId = rawWalletId.replace(/^did:pehchan:/, '');
+  const requestStore = getVerificationRequestStore();
+  const allRequests = await requestStore.readRequests();
+  return allRequests.filter(
+    (req) => req.walletId === walletId || req.walletId === `did:pehchan:${walletId}` || req.walletId === rawWalletId,
+  );
+}
+
+module.exports = { createVerificationRequest, processConsent, fetchRequestStatus, getRequestsForWallet };

@@ -1,4 +1,4 @@
-const { createVerificationRequest, processConsent, fetchRequestStatus } = require('../services/verificationService');
+const { createVerificationRequest, processConsent, fetchRequestStatus, getRequestsForWallet } = require('../services/verificationService');
 
 async function requestVerification(req, res, next) {
   try {
@@ -38,5 +38,13 @@ async function getRequestStatus(req, res, next) {
   }
 }
 
-module.exports = { requestVerification, submitConsent, getRequestStatus };
+async function getWalletRequests(req, res, next) {
+  try {
+    const requests = await getRequestsForWallet(req.params.walletId);
+    res.status(200).json({ status: 'success', data: requests });
+  } catch (error) {
+    next(error);
+  }
+}
 
+module.exports = { requestVerification, submitConsent, getRequestStatus, getWalletRequests };

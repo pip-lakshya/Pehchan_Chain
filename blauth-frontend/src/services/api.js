@@ -267,3 +267,11 @@ export async function getAuditLogsForDID(did) {
   return responseBody.data;
 }
 
+export async function getVerificationRequestsForWallet(walletId) {
+  if (!walletId) return [];
+  const response = await fetch(`${API_BASE_URL}/verify/wallet/${encodeURIComponent(walletId)}`);
+  const responseBody = await response.json().catch(() => null);
+  if (!response.ok) return [];
+  return responseBody.data || [];
+}
+

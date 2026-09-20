@@ -211,9 +211,7 @@ async function getAssetOwner(tokenId) {
   try {
     const ownerInfo = await getAssetOwnerOnChain(tokenId);
     if (!ownerInfo.ownerAddress || ownerInfo.ownerAddress === '0x0000000000000000000000000000000000000000') {
-      const err = new Error('Asset not found.');
-      err.status = 404;
-      throw err;
+      return mockStore.getOwner(tokenId);
     }
     return {
       tokenId,
@@ -221,22 +219,28 @@ async function getAssetOwner(tokenId) {
       targetDID: ownerInfo.targetDID,
     };
   } catch (error) {
-    if (error.status === 404) throw error;
-    const err = new Error(`Asset not found: ${error.message}`);
-    err.status = 404;
-    throw err;
+    try {
+      return mockStore.getOwner(tokenId);
+    } catch {
+      if (error.status === 404) throw error;
+      const err = new Error(`Asset not found: ${error.message}`);
+      err.status = 404;
+      throw err;
+    }
   }
 }
 
 /** Get assets by identity DID */
 async function getAssetsByIdentity(targetDID) {
+  const localData = mockStore.getByDID(targetDID);
+
   if (!isBlockchainEnabled()) {
-    return mockStore.getByDID(targetDID);
+    return localData;
   }
 
   try {
     const tokenIds = await getAssetsByDIDOnChain(targetDID);
-    const assets = await Promise.all(
+    const onChainAssets = await Promise.all(
       tokenIds.map(async (id) => {
         try {
           return await getAssetOnChain(id);
@@ -245,14 +249,24 @@ async function getAssetsByIdentity(targetDID) {
         }
       }),
     );
+    const validOnChain = onChainAssets.filter(Boolean);
+
+    const tokenSet = new Set([...tokenIds, ...localData.tokenIds]);
+    const assetMap = new Map();
+    for (const a of localData.assets) {
+      if (a) assetMap.set(String(a.tokenId || a.id), a);
+    }
+    for (const a of validOnChain) {
+      if (a) assetMap.set(String(a.tokenId || a.id), a);
+    }
 
     return {
       targetDID,
-      tokenIds,
-      assets: assets.filter(Boolean),
+      tokenIds: Array.from(tokenSet),
+      assets: Array.from(assetMap.values()),
     };
   } catch (error) {
-    return { targetDID, tokenIds: [], assets: [] };
+    return localData;
   }
 }
 
