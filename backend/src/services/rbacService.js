@@ -83,10 +83,19 @@ class MockRoleStore {
   }
 
   seedDefaults() {
-    const adminAcct = resolveAddressFromDID('did:pehchan:admin_workspace');
-    if (!this.rolesMap.has(adminAcct)) {
-      this.rolesMap.set(adminAcct, new Set(['ADMIN', 'MANAGER', 'AUDITOR', 'USER']));
+    const adminDIDs = [
+      'did:pehchan:admin_workspace',
+      'did:pehchan:wallet_384afd2d-70a9-41c4-8b5c-0d2c837a3280',
+      'did:pehchan:wallet_9302762e-d1b5-487e-8a41-fdef26fad4ef',
+    ];
+
+    for (const did of adminDIDs) {
+      const acct = resolveAddressFromDID(did);
+      if (!this.rolesMap.has(acct)) {
+        this.rolesMap.set(acct, new Set(['ADMIN', 'MANAGER', 'AUDITOR', 'USER']));
+      }
     }
+
     const mgrAcct = resolveAddressFromDID('did:pehchan:manager_workspace');
     if (!this.rolesMap.has(mgrAcct)) {
       this.rolesMap.set(mgrAcct, new Set(['MANAGER', 'USER']));

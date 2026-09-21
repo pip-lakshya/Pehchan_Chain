@@ -54,6 +54,17 @@ class MockAssetStore {
         mintedAt: "1789884470",
         updatedAt: "1789884470",
       },
+      {
+        tokenId: "4",
+        ownerAddress: "0xebacaEc8C8bC1E7e2D37355788DdB22C1EB209FD",
+        targetDID: "did:pehchan:wallet_9302762e-d1b5-487e-8a41-fdef26fad4ef",
+        name: "Senior Security Officer Pass",
+        category: "SECURITY_CLEARANCE",
+        ipfsHash: "ipfs://QmPehchanAdminPass004",
+        payloadHash: "0x11223344556677889900aabbccddeeff11223344556677889900aabbccddeeff",
+        mintedAt: "1789888000",
+        updatedAt: "1789888000",
+      },
     ];
 
     let maxId = 0n;
